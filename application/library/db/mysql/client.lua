@@ -22,9 +22,8 @@ function Client:instance()
 end
 
 function Client:connect(args)
-    if not args.port then
-        args.port = 3306
-    end
+    if not args.timeout then args.timeout = 0 end
+    if not args.port then args.port = 3306 end
 
     if self.conn then
         return self
@@ -36,7 +35,7 @@ function Client:connect(args)
         port = args.port,
         user = args.user,
         password = args.password,
-        database = args.database
+        database = args.database,
     })
 
     if not ok then

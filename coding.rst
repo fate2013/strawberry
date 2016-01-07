@@ -165,6 +165,15 @@ best practice
 
 - never, ever trust players input
 
+- always add a comma after an entry in array
+
+  ::
+
+    local rules = {
+        uid = 12,  -- the ',' 
+    }
+
+
 Logging
 =======
 
