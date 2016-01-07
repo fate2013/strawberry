@@ -18,8 +18,8 @@ function Bootstrap:initView()
 end
 
 function Bootstrap:initPlugin()
-    local admin_plugin = require('plugins.admin'):new()
-    self.dispatcher:registerPlugin(admin_plugin);
+    local mysql_plugin = require('plugins.mysql'):new()
+    self.dispatcher:registerPlugin(mysql_plugin);
 end
 
 function Bootstrap:boot_list()
@@ -28,7 +28,7 @@ function Bootstrap:boot_list()
         -- Bootstrap.initErrorHandle,
         -- Bootstrap.initRoute,
         -- Bootstrap.initView,
-        -- Bootstrap.initPlugin,
+        Bootstrap.initPlugin,
     }
 end
 

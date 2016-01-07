@@ -1,40 +1,46 @@
 local mysql = require "resty.mysql"
 
 local Client = {
-    __index = Client
-    instance = {}
+    obj = nil
 }
+Client.__index = Client
 
-local function Client:new()
-    if self.instance then
-        return self.instance
-    end
-    self.instance = setmetatable({}, Client)
-    return self.instance
+function Client:new()
+    return setmetatable({
+        conn = nil
+    }, Client)
 end
 
-local function Client:connect(host, port, user, password, db, timeout)
-    port = port or 3306
-    timeout = timeout or 0
+function Client:instance()
+    if self.obj then
+        return self.obj
+    end
+    self.obj = setmetatable({
+        conn = nil
+    }, Client)
+    return self.obj
+end
 
+function Client:connect(args)
+    if not args.port then
+        args.port = 3306
+    end
+
+    if self.conn then
+        return self
+    end
     local conn = mysql:new()
-    conn:set_timeout(timeout)
-    local ok, err, errno, sqlstate = db:connect({
-        host = host,
-        port = port,
-        user = user,
-        password = password,
-        database = db
+    conn:set_timeout(args.timeout)
+    local ok, err, errno, sqlstate = conn:connect({
+        host = args.host,
+        port = args.port,
+        user = args.user,
+        password = args.password,
+        database = args.database
     })
 
     if not ok then
         ngx.say("failed to connect: ", err, ": ", errno, " ", sqlstate)
-        return
-    end
-
-    local ok, err = db:set_keepalive()
-    if not ok then
-        ngx.say("failed to set keepalive: ", err)
         return
     end
 
@@ -43,8 +49,8 @@ local function Client:connect(host, port, user, password, db, timeout)
     return self
 end
 
-local function Client:query(sql)
-    local res, err, errno, sqlstate = db:query(sql)
+function Client:query(sql)
+    local res, err, errno, sqlstate = self.conn:query(sql)
 
     if not res then
         ngx.say("bad result: ", err, ": ", errno, ": ", sqlstate, ".")
@@ -52,6 +58,14 @@ local function Client:query(sql)
     end
 
     return res
+end
+
+function Client:keepalive()
+    local ok, err = self.conn:set_keepalive()
+    if not ok then
+        ngx.say("failed to set keepalive: ", err)
+        return
+    end
 end
 
 return Client
