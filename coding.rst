@@ -121,6 +121,14 @@ naming
     int_uid;    // never do like this
     uid;       // do like this
 
+- camel case names
+
+  used for class name
+
+  ::
+
+    MysqlClient = {}
+
 - lower case connected with underscore names
 
   used for file name, class name, function name
@@ -128,7 +136,6 @@ naming
   ::
 
     mysql_client.lua
-    mysql_client = {}
     function do_connect(host, port, timeout) {
 
 - do not reinvent an abbreviation unless it is really well known
