@@ -11,34 +11,29 @@ function Replica:instance()
     end
     self.obj = setmetatable({
         config = require "config.mysql",
-        m = nil,
-        slaves = {},
+        clients = {},
     }, Replica)
     return self.obj
 end
 
 function Replica:master()
-    if self.m then
-        return self.m
-    end
-    self.m = mysql_client:new()
-    if not self.m:connect(self.config.m) then
+    local client = mysql_client:new()
+    if not client:connect(self.config.master) then
         return
     end
-    return self.m
+    table.insert(self.clients, client)
+    return client
 end
 
 function Replica:slave()
     math.randomseed(os.time())
     local index = math.random(#self.config.slaves)
-    if self.slaves[index] then
-        return self.slaves[index]
-    end
-    self.slaves[index] = mysql_client:new()
-    if not self.slaves[index]:connect(self.config.slaves[index]) then
+    local client = mysql_client:new()
+    if not client:connect(self.config.slaves[index]) then
         return
     end
-    return self.slaves[index]
+    table.insert(self.clients, client)
+    return client
 end
 
 return Replica

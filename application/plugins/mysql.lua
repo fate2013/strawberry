@@ -15,13 +15,10 @@ end
 function MysqlPlugin:postDispatch(request, response)
     local mysql_replica = require "library.db.mysql.replica"
     local replica = mysql_replica:instance()
-    if replica.m then
-        replica.m:keepalive()
-    end
-    for i, client in pairs(replica.slaves) do
+    for i, client in pairs(replica.clients) do
         client:keepalive()
     end
-    mysql_replica.obj = nil
+    replica.clients = {}
 end
 
 function MysqlPlugin:dispatchLoopShutdown(request, response)

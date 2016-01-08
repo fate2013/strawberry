@@ -121,7 +121,7 @@ naming
     int_uid;    // never do like this
     uid;       // do like this
 
-- private var all starts with '_'
+- private var && method all starts with '_'
 
 - camel case names
 
