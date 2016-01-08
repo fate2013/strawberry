@@ -19,7 +19,9 @@ end
 
 function Bootstrap:initPlugin()
     local mysql_plugin = require('plugins.mysql'):new()
+    local redis_plugin = require('plugins.redis'):new()
     self.dispatcher:registerPlugin(mysql_plugin);
+    self.dispatcher:registerPlugin(redis_plugin);
 end
 
 function Bootstrap:boot_list()
