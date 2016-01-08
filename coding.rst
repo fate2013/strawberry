@@ -121,6 +121,8 @@ naming
     int_uid;    // never do like this
     uid;       // do like this
 
+- private var all starts with '_'
+
 - camel case names
 
   used for class name
@@ -137,6 +139,14 @@ naming
 
     mysql_client.lua
     function do_connect(host, port, timeout) {
+
+- upper case connected with underscore names
+
+  used for constants
+
+  ::
+
+    local DEFAULT_REPLICAS = 64
 
 - do not reinvent an abbreviation unless it is really well known
 
