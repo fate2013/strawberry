@@ -1,7 +1,7 @@
 local mysql_client = require "library.db.mysql.client"
 
 local Replica = {
-    obj = nil,
+    obj = nil
 }
 Replica.__index = Replica
 

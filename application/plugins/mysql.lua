@@ -21,6 +21,7 @@ function MysqlPlugin:postDispatch(request, response)
     for i, client in pairs(replica.slaves) do
         client:keepalive()
     end
+    mysql_replica.obj = nil
 end
 
 function MysqlPlugin:dispatchLoopShutdown(request, response)

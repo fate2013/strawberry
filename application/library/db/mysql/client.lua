@@ -1,33 +1,23 @@
 local mysql = require "resty.mysql"
 
 local Client = {
-    obj = nil
 }
 Client.__index = Client
 
 function Client:new()
     return setmetatable({
-        conn = nil
+        conn = nil,
     }, Client)
-end
-
-function Client:instance()
-    if self.obj then
-        return self.obj
-    end
-    self.obj = setmetatable({
-        conn = nil
-    }, Client)
-    return self.obj
 end
 
 function Client:connect(args)
-    if not args.timeout then args.timeout = 0 end
-    if not args.port then args.port = 3306 end
-
     if self.conn then
         return self
     end
+
+    if not args.timeout then args.timeout = 0 end
+    if not args.port then args.port = 3306 end
+
     local conn = mysql:new()
     conn:set_timeout(args.timeout)
     local ok, err, errno, sqlstate = conn:connect({
@@ -63,7 +53,6 @@ function Client:keepalive()
     local ok, err = self.conn:set_keepalive()
     if not ok then
         ngx.say("failed to set keepalive: ", err)
-        return
     end
 end
 
