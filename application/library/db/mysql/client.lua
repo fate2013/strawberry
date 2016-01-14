@@ -1,6 +1,7 @@
 local mysql = require "resty.mysql"
 
 local Client = {
+    clients = {},
 }
 Client.__index = Client
 
@@ -34,6 +35,8 @@ function Client:connect(args)
     end
 
     self.conn = conn
+
+    table.insert(Client.clients, self)
 
     return self
 end

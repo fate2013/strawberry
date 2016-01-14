@@ -5,16 +5,20 @@ local DEFAULT_CONNECT_TIMEOUT = 2000
 local Cluster = {}
 Cluster.__index = Cluster
 
-function Cluster:instance()
+function Cluster:instance(cluster)
+    if not cluster then cluster = "default" end
     if self.obj then
         return self.obj
     end
     local config = require "config.redis"
     self.obj = setmetatable({
-        clients = {},
         config = {},
     }, Cluster)
-    for k, v in pairs(config.cluster) do
+    local cluster_config = config.clusters[cluster]
+    if type(cluster_config) ~= "table" then
+        return
+    end
+    for k, v in pairs(config.clusters[cluster]) do
         if not v.port then v.port = 6379 end
         if not v.timeout then v.timeout = DEFAULT_CONNECT_TIMEOUT end
         self.obj.config[v.host .. ":" .. v.port] = v
@@ -41,7 +45,6 @@ function Cluster:query(cmd, ...)
     }) then
         return
     end
-    table.insert(self.clients, client)
     res = client:query(cmd, ...)
     return res
 end

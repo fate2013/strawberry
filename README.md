@@ -6,5 +6,3 @@ Basic guide for lua web framework
 *   new router for unit test
 
 *   Api Test && CI
-
-*   multi database && sharding support

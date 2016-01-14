@@ -1,6 +1,7 @@
 local redis = require "resty.redis"
 
 local Client = {
+    clients = {}
 }
 Client.__index = Client
 
@@ -28,8 +29,9 @@ function Client:connect(args)
         return
     end
 
-
     self.conn = conn
+
+    table.insert(Client.clients, self)
 
     return self
 end

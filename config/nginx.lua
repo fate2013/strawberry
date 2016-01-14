@@ -10,7 +10,7 @@ ngx_conf.common = {
 
 ngx_conf.env = {}
 ngx_conf.env.development = {
-    LUA_CODE_CACHE = false,
+    LUA_CODE_CACHE = true,
     PORT = 9110
 }
 

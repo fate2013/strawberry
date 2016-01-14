@@ -13,12 +13,11 @@ function MysqlPlugin:preDispatch(request, response)
 end
 
 function MysqlPlugin:postDispatch(request, response)
-    local mysql_replica = require "library.db.mysql.replica"
-    local replica = mysql_replica:instance()
-    for i, client in pairs(replica.clients) do
-        client:keepalive()
+    local client = require "library.db.mysql.client"
+    for i, conn in pairs(client.clients) do
+        conn:keepalive()
     end
-    replica.clients = {}
+    client.clients = {}
 end
 
 function MysqlPlugin:dispatchLoopShutdown(request, response)

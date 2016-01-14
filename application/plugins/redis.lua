@@ -13,12 +13,11 @@ function RedisPlugin:preDispatch(request, response)
 end
 
 function RedisPlugin:postDispatch(request, response)
-    local redis_cluster = require "library.db.redis.cluster"
-    local cluster = redis_cluster:instance()
-    for k, client in pairs(cluster.clients) do
+    local redis = require "library.db.redis.client"
+    for k, client in pairs(redis.clients) do
         client:keepalive()
     end
-    cluster.clients = {}
+    redis.clients = {}
 end
 
 function RedisPlugin:dispatchLoopShutdown(request, response)

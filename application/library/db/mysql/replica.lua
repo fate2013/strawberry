@@ -1,19 +1,24 @@
 local mysql_client = require "library.db.mysql.client"
 
 local Replica = {
-    obj = nil
+    obj = {}
 }
 Replica.__index = Replica
 
-function Replica:instance() 
-    if self.obj then
-        return self.obj
+function Replica:instance(db)
+    if not db then db = "default" end
+    if self.obj[db] then
+        return self.obj[db]
     end
-    self.obj = setmetatable({
-        config = require "config.mysql",
-        clients = {},
+    local config = require "config.mysql"
+    local db_config = config[db]
+    if type(db_config) ~= "table" then
+        return
+    end
+    self.obj[db] = setmetatable({
+        config = db_config,
     }, Replica)
-    return self.obj
+    return self.obj[db]
 end
 
 function Replica:master()
@@ -21,7 +26,6 @@ function Replica:master()
     if not client:connect(self.config.master) then
         return
     end
-    table.insert(self.clients, client)
     return client
 end
 
@@ -32,7 +36,6 @@ function Replica:slave()
     if not client:connect(self.config.slaves[index]) then
         return
     end
-    table.insert(self.clients, client)
     return client
 end
 

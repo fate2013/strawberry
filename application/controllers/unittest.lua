@@ -20,14 +20,20 @@ end
 
 function UnittestController:mysqlreplica_master()
     local mysql_replica = require "library.db.mysql.replica"
-    local replica = mysql_replica:instance()
+    local replica = mysql_replica:instance("activity")
+    if not replica then
+        return "invalid mysql db specified"
+    end
     local res = replica:master():query("select * from user")
     return cjson.encode(res)
 end
 
 function UnittestController:mysqlreplica_slave()
     local mysql_replica = require "library.db.mysql.replica"
-    local replica = mysql_replica:instance()
+    local replica = mysql_replica:instance("activity")
+    if not replica then
+        return "invalid mysql db specified"
+    end
     local res = replica:slave():query("select * from user")
     return cjson.encode(res)
 end
@@ -76,7 +82,11 @@ end
 function UnittestController:rediscluster()
     local redis_cluster = require "library.db.redis.cluster"
     local cluster = redis_cluster:instance()
-    return cjson.encode(cluster:query("get", "dog"))
+    if cluster then
+        return cjson.encode(cluster:query("get", "dog"))
+    else
+        return "invalid redis cluster specified"
+    end
 end
 
 function UnittestController:_random_string(length)
@@ -85,6 +95,13 @@ function UnittestController:_random_string(length)
         res = res .. string.char(math.random(97, 122))
     end
     return res
+end
+
+function UnittestController:test()
+    local s = require("vanilla.v.libs.http"):new()
+    local res = s:get("http://www.baidu.com",'GET','',{},0)
+
+    return res.body
 end
 
 return UnittestController
