@@ -71,7 +71,7 @@ function UnittestController:flexihash()
         freq[target] = freq[target] + 1
     end
 
-    return response:new():send_json(res)
+    return response:new():send_json(freq)
 end
 
 function UnittestController:crc32()
