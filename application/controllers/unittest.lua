@@ -1,4 +1,4 @@
-local cjson = require "cjson"
+local response = require "system.response"
 
 local UnittestController = {}
 
@@ -14,8 +14,8 @@ function UnittestController:mysqlclient()
     }) then
         return
     end
-    res = client:query("select * from user")
-    return cjson.encode(res)
+    local res = client:query("select * from user")
+    return response:new():send_json(res)
 end
 
 function UnittestController:mysqlreplica_master()
@@ -25,7 +25,7 @@ function UnittestController:mysqlreplica_master()
         return "invalid mysql db specified"
     end
     local res = replica:master():query("select * from user")
-    return cjson.encode(res)
+    return response:new():send_json(res)
 end
 
 function UnittestController:mysqlreplica_slave()
@@ -35,7 +35,7 @@ function UnittestController:mysqlreplica_slave()
         return "invalid mysql db specified"
     end
     local res = replica:slave():query("select * from user")
-    return cjson.encode(res)
+    return response:new():send_json(res)
 end
 
 function UnittestController:redisclient()
@@ -48,7 +48,7 @@ function UnittestController:redisclient()
         return
     end
     res = client:query("get", "dog")
-    return cjson.encode(res)
+    return response:new():send_json(res)
 end
 
 function UnittestController:flexihash()
@@ -71,7 +71,7 @@ function UnittestController:flexihash()
         freq[target] = freq[target] + 1
     end
 
-    return cjson.encode(freq)
+    return response:new():send_json(res)
 end
 
 function UnittestController:crc32()
@@ -83,7 +83,7 @@ function UnittestController:rediscluster()
     local redis_cluster = require "library.db.redis.cluster"
     local cluster = redis_cluster:instance()
     if cluster then
-        return cjson.encode(cluster:query("get", "dog"))
+        return response:new():send_json(cluster:query("get", "dog"))
     else
         return "invalid redis cluster specified"
     end
