@@ -32,8 +32,7 @@ function Cluster:instance(cluster)
 end
 
 function Cluster:query(cmd, ...)
-    local arg = {...}
-    local key = arg[1]
+    local key = select(1, ...)
     local target = self.obj.hasher:lookup(key)
     local index = string.find(target, ":")
 

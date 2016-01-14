@@ -17,13 +17,12 @@ local function empty_table(tbl)
     return true
 end
 
-function Flexihash:instance(...)
+function Flexihash:instance(replicas)
+    if not replicas then replicas = DEFAULT_REPLICAS end
+
     if self.obj then
         return self.obj
     end
-
-    local arg = {...}
-    if arg[1] then replicas = arg[1] else replicas = DEFAULT_REPLICAS end
 
     self.obj = setmetatable({
         _replicas = replicas,
