@@ -1,3 +1,3 @@
-local config = require('config.application')
+local config = require('config.test')
 local app = require('framework.application'):new(config)
 app:bootstrap():run()
