@@ -60,8 +60,10 @@ function UnittestController:flexihash()
         freq[target] = 0
     end
 
+    math.randomseed(os.time())
     for i = 1, 1000 do
         local str = _random_string(3)
+        --local target = flexihash:lookup_list(str, 1)[1]
         local target = flexihash:lookup(str)
         freq[target] = freq[target] + 1
     end

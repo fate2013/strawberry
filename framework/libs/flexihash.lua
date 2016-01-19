@@ -27,9 +27,9 @@ function Flexihash:instance(replicas)
     self.obj = setmetatable({
         _replicas = replicas,
         _target_count = 0,
-        _position2target = {},
-        _target2positions = {},
-        _position2target_sorted = false,
+        _position_target_pairs = {},
+        _target2indexes = {},
+        _position_sorted = false,
     }, self)
     return self.obj
 end
@@ -37,20 +37,20 @@ end
 function Flexihash:add_target(target, weight)
     if not weight then weight = 1 end
     
-    if self._target2positions[target] then
+    if self._target2indexes[target] then
         return
     end
 
-    self._target2positions[target] = {}
+    self._target2indexes[target] = {}
 
     -- hash the target into multiple positions
     for i = 1, math.floor(self._replicas * weight) do
         position = CRC.crc32(target .. i)
-        self._position2target[position] = target -- lookup
-        table.insert(self._target2positions[target], position) -- target removal
+        table.insert(self._position_target_pairs, {position, target}) -- lookup
+        table.insert(self._target2indexes[target], #self._position_target_pairs) -- target removal
     end
 
-    self._position2target_sorted = false
+    self._position_sorted = false
     self._target_count = self._target_count + 1
 
     return self
@@ -65,15 +65,15 @@ function Flexihash:add_targets(targets, weight)
 end
 
 function Flexihash:remove_target(target)
-    if self._target2positions[target] then
+    if not self._target2indexes[target] then
         return
     end
 
-    for k, position in pairs(self._target2positions[target]) do
-        self._position2target[position] = nil
+    for _, index in pairs(self._target2indexes[target]) do
+        table.remove(self._position_target_pairs, index)
     end
 
-    self._target2positions[target] = nil
+    self._target2indexes[target] = nil
 
     self._target_count = self._target_count - 1
 
@@ -82,55 +82,88 @@ end
 
 function Flexihash:get_all_targets()
     local targets = {}
-    for target, _ in pairs(self._target2positions) do
+    for target, _ in pairs(self._target2indexes) do
         table.insert(targets, target)
     end
     return targets
 end
 
 function Flexihash:lookup(resource)
-    targets = self:lookup_list(resource, 1)
-    if not targets then
+    -- handle no targets
+    if empty_table(self._position_target_pairs) then
         return
     end
-    return targets[1]
+
+    -- optimize single target
+    if self._target_count == 1 then
+        for target, _ in pairs(self._target2indexes) do
+            return {target}
+        end
+    end
+    local resource_position = CRC.crc32(resource)
+
+    self:_sort_position_targets()
+
+    local lower = 1
+    local higher = #self._position_target_pairs
+
+    if self._position_target_pairs[higher][1] < resource_position then
+        return self._position_target_pairs[1][2]
+    end
+
+    local middle
+    while higher - lower > 1 do
+        middle = math.ceil((lower + higher) / 2)
+        if resource_position == self._position_target_pairs[middle][1] then
+            return self._position_target_pairs[middle][2]
+        elseif resource_position < self._position_target_pairs[middle][1] then
+            higher = middle
+        else
+            lower = middle
+        end
+    end
+
+    return self._position_target_pairs[higher][2]
 end
 
+-- TODO need optimize
 function Flexihash:lookup_list(resource, requested_count)
     if not requested_count or requested_count < 1 then
         return
     end
 
     -- handle no targets
-    if empty_table(self._position2target) then
+    if empty_table(self._position_target_pairs) then
         return
     end
 
     -- optimize single target
     if self._target_count == 1 then
-        for k, target in pairs(self._position2target) do
+        for target, _ in pairs(self._target2indexes) do
             return {target}
         end
     end
 
     -- hash resource to a position
-    resource_position = CRC.crc32(resource)
+    local resource_position = CRC.crc32(resource)
 
-    results = {}
-    collect = false
+    local results = {}
+    local results_map = {}
+    local collect = false
 
     self:_sort_position_targets()
     
     -- search values above the resourcePosition
-    for k, v in pairs(self._position2target) do
+    for _, position_target in pairs(self._position_target_pairs) do
         -- start collecting targets after passing resource position
-        if not collect and k > resource_position then
+        if not collect and position_target[1] > resource_position then
             collect = true
         end
 
         -- only collect the first instance of any target
-        if  collect and not results[v] then
-            table.insert(results, v)
+        if collect and not results_map[position_target[2]] then
+            table.insert(results, position_target[2])
+            results_map[position_target[2]] = 1
         end
 
         -- return when enough results, or list exhausted
@@ -140,9 +173,10 @@ function Flexihash:lookup_list(resource, requested_count)
     end
 
     -- loop to start - search values below the resourcePosition
-    for k, v in pairs(self._position2target) do
-        if not results[v] then
-            table.insert(results, v)
+    for _, position_target in pairs(self._position_target_pairs) do
+        if not results_map[position_target[2]] then
+            table.insert(results, position_target[2])
+            results_map[position_target[2]] = 1
         end
 
         -- return when enough results, or list exhausted
@@ -156,16 +190,22 @@ function Flexihash:lookup_list(resource, requested_count)
     return results
 end
 
-Flexihash.__tostring = function()
+Flexihash.__tostring = function(self)
     return "Flexihash{targets:[" .. table.concat(self:get_all_targets(), ",") .. "]}"
 end
 
 -- Sorts the internal mapping (positions to targets) by position
 function Flexihash:_sort_position_targets()
     -- sort by key (position) if not already
-    if not self._positionToTargetSorted then
-        table.sort(self._position2target)
-        self._position2target_sorted = true
+    if not self._position_sorted then
+        table.sort(self._position_target_pairs, function(a, b) return a[1] < b[1] end)
+        self._position_sorted = true
+        for target, _ in pairs(self._target2indexes) do
+            self._target2indexes[target] = {}
+        end
+        for index, position_target in pairs(self._position_target_pairs) do
+            table.insert(self._target2indexes[position_target[2]], index)
+        end
     end
 end
 
