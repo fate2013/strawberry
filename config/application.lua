@@ -4,7 +4,7 @@ Appconf.name = 'framework'
 Appconf.route='framework.routes.simple'
 Appconf.bootstrap='app.bootstrap'
 Appconf.app={}
-Appconf.app.root='/home/nicholaskh/lua_web_framework/'
+Appconf.app.root=ngx.var.root .. '/'
 
 Appconf.controller={}
 Appconf.controller.path=Appconf.app.root .. 'app/controllers/'
