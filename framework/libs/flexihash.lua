@@ -97,7 +97,7 @@ function Flexihash:lookup(resource)
     -- optimize single target
     if self._target_count == 1 then
         for target, _ in pairs(self._target2indexes) do
-            return {target}
+            return target
         end
     end
     local resource_position = CRC.crc32(resource)
