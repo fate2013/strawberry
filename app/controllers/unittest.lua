@@ -87,6 +87,18 @@ function UnittestController:rediscluster()
     end
 end
 
+function UnittestController:redisclusterop()
+    local redis_cluster = require "framework.db.redis.cluster"
+    local config = require "app.config.redis"
+    local cluster = redis_cluster:instance("activity", config.clusters.activity)
+    if cluster then
+        --return response:new():send_json(cluster:query("hset", "doghash", "t", "abcde"))
+        return response:new():send_json(cluster:query("hget", "doghash", "t"))
+    else
+        return "invalid redis cluster specified"
+    end
+end
+
 function UnittestController:error()
     return response:new():error(404, "Resource not found")
 end

@@ -8,7 +8,7 @@ Client.__tostring = function(self)
 end
 
 
-function Client:new(host, port, conn_timeout, pool_size, keepalive_time)
+function Client:new(host, port, conn_timeout, pool_size, keepalive_time, pwd)
     if not host then host = "127.0.0.1" end
     if not port then port = 6379 end
     if not conn_timeout then conn_timeout = 0 end
@@ -21,6 +21,7 @@ function Client:new(host, port, conn_timeout, pool_size, keepalive_time)
         conn_timeout = conn_timeout,
         pool_size = pool_size,
         keepalive_time = keepalive_time,
+        pwd = pwd,
     }, Client)
 end
 
@@ -49,6 +50,9 @@ function Client:query(cmd, ...)
     local conn = connect(self.host, self.port, self.conn_timeout)
     if not conn then
         return
+    end
+    if self.need_auth then
+        conn["auth"](pwd)
     end
     local res, err = conn[cmd](conn, ...)
     if not res or res == ngx.null then

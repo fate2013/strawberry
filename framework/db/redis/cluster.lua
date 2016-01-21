@@ -14,9 +14,11 @@ function Cluster:instance(name, config)
     if clusters[name] then
         return clusters[name]
     end
-    local instance = setmetatable({clients = {}}, Cluster)
+    local instance = setmetatable({
+        clients = {},
+    }, Cluster)
     for i, v in pairs(config) do
-        local client = redis_client:new(v.host, v.port, v.conn_timeout, v.pool_size, v.keepalive_time)
+        local client = redis_client:new(v.host, v.port, v.conn_timeout, v.pool_size, v.keepalive_time, v.pwd)
         instance.clients[tostring(client)] = client
     end
     for i, client in pairs(instance.clients) do
