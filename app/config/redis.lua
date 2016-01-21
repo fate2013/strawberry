@@ -21,6 +21,7 @@ RedisConf.clusters = {
         },
         {
             host = "127.0.0.1",
+            pwd = "1111",
         },
     },
 }

@@ -51,8 +51,8 @@ function Client:query(cmd, ...)
     if not conn then
         return
     end
-    if self.need_auth then
-        conn["auth"](pwd)
+    if self.pwd then
+        conn:auth(self.pwd)
     end
     local res, err = conn[cmd](conn, ...)
     if not res or res == ngx.null then
