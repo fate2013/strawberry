@@ -137,6 +137,7 @@ naming
 
   ::
 
+    local my_str = ''
     mysql_client.lua
     function do_connect(host, port, timeout) {
 
