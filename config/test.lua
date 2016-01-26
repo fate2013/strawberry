@@ -1,13 +1,13 @@
 local Appconf={}
 Appconf.name = 'framework'
 
-Appconf.route='vanilla.v.routes.simple'
+Appconf.route='framework.routes.simple'
 Appconf.bootstrap='test.bootstrap'
 Appconf.app={}
-Appconf.app.root='./'
+Appconf.app.root=ngx.var.root .. '/'
 
 Appconf.controller={}
-Appconf.controller.path=Appconf.app.root .. 'test/controllers/'
+Appconf.controller.prefix = 'test.controllers.'
 
 Appconf.view={}
 Appconf.view.path=Appconf.app.root .. 'test/views/'

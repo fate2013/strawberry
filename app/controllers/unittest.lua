@@ -34,7 +34,7 @@ end
 function UnittestController:redisclient()
     local redis_client = require "framework.db.redis.client"
     local client = redis_client:new("127.0.0.1", 6379, 1000)
-    res = client:query("get", "dog")
+    res = client:query("mget", unpack({"dog", "aaaa", "bbbb"}))
     return response:new():send_json(res)
 end
 

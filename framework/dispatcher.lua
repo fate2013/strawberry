@@ -30,7 +30,7 @@ function Dispatcher:new(application)
     local instance = {
         application = application,
         plugins = {},
-        controller_prefix = 'app.controllers.',
+        controller_prefix = application.config.controller.prefix,
         error_controller = 'error',
         error_action = 'error'
     }
