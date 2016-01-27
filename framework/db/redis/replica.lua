@@ -1,4 +1,4 @@
-local mysql_client = require "framework.db.mysql.client"
+local redis_client = require "framework.db.redis.client"
 local function tappend(t, v) t[#t+1] = v end
 
 local Replica = {}
@@ -11,15 +11,15 @@ function Replica:instance(name, config)
         return replicas[name]
     end
     local instance = setmetatable({
-        m = mysql_client:new(config.master.host, config.master.port, config.master.user,
-            config.master.password, config.master.database, config.master.conn_timeout,
-            config.master.pool_size, config.master.keepalive_time),
+        m = redis_client:new(config.master.host, config.master.port,
+            config.master.conn_timeout, config.master.pool_size,
+            config.master.keepalive_time, config.master.pwd),
         slaves = {},
     }, Replica)
-
+    
     for i, v in pairs(config.slaves) do
-        tappend(instance.slaves, mysql_client:new(v.host, v.port, v.user, v.password,
-            v.database, v.conn_timeout, v.pool_size, v.keepalive_time))
+        tappend(instance.slaves, redis_client:new(v.host, v.port,
+            v.conn_timeout, v.pool_size, v.keepalive_time, v.pwd))
     end
 
     replicas[name] = instance

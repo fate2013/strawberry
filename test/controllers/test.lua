@@ -11,7 +11,7 @@ end
 
 function TestController:mysqlreplica_master()
     local mysql_replica = require "framework.db.mysql.replica"
-    local config = require "app.config.mysql"
+    local config = require "test.config.mysql"
     local replica = mysql_replica:instance("activity", config.activity)
     if not replica then
         return "invalid mysql db specified"
@@ -22,7 +22,7 @@ end
 
 function TestController:mysqlreplica_slave()
     local mysql_replica = require "framework.db.mysql.replica"
-    local config = require "app.config.mysql"
+    local config = require "test.config.mysql"
     local replica = mysql_replica:instance("activity", config.activity)
     if not replica then
         return "invalid mysql db specified"
@@ -78,8 +78,8 @@ end
 
 function TestController:rediscluster()
     local redis_cluster = require "framework.db.redis.cluster"
-    local config = require "app.config.redis"
-    local cluster = redis_cluster:instance("activity", config.clusters.activity)
+    local config = require "test.config.redis"
+    local cluster = redis_cluster:instance("activity", config.cluster.activity)
     if cluster then
         return response:new():send_json(cluster:query("get", "dog"))
     else
@@ -89,10 +89,10 @@ end
 
 function TestController:redisclusterop()
     local redis_cluster = require "framework.db.redis.cluster"
-    local config = require "app.config.redis"
-    local cluster = redis_cluster:instance("activity", config.clusters.activity)
+    local config = require "test.config.redis"
+    local cluster = redis_cluster:instance("activity", config.cluster.activity)
     if cluster then
-        --return response:new():send_json(cluster:query("hset", "doghash", "t", "abcde"))
+        --return response:new():send_json(cluster:query("hset", "doghash", "t", "abcde", "aaa"))
         return response:new():send_json(cluster:query("hget", "doghash", "t"))
     else
         return "invalid redis cluster specified"
@@ -113,10 +113,25 @@ end
 function TestController:redismget()
     local redis_client = require "framework.db.redis.client"
     local client = redis_client:new("127.0.0.1", 6379, 1000)
-    res = client:query("mget", unpack({"dog", "aaaa", "bbbb"}))
+    local res = client:query("mget", unpack({"dog", "aaaa", "bbbb"}))
     return response:new():send_json(res)
 end
 
+function TestController:redisreplica_master()
+    local redis_replica = require "framework.db.redis.replica"
+    local config = require "test.config.redis"
+    local replica = redis_replica:instance("activity", config.replica.activity)
+    local res = replica:master():query("mget", "dog", "aaaa", "bbbb")
+    return response:new():send_json(res)
+end
+
+function TestController:redisreplica_slave()
+    local redis_replica = require "framework.db.redis.replica"
+    local config = require "test.config.redis"
+    local replica = redis_replica:instance("activity", config.replica.activity)
+    local res = replica:slave():query("mget", "dog", "aaaa")
+    return response:new():send_json(res)
+end
 
 function TestController:log()
     ngx.log(ngx.ERR, "hello log, ", "abc")
