@@ -110,6 +110,14 @@ function TestController:test()
     return res.body
 end
 
+function UnittestController:redismget()
+    local redis_client = require "framework.db.redis.client"
+    local client = redis_client:new("127.0.0.1", 6379, 1000)
+    res = client:query("mget", unpack({"dog", "aaaa", "bbbb"}))
+    return response:new():send_json(res)
+end
+
+
 function TestController:log()
     ngx.log(ngx.ERR, "hello log, ", "abc")
     return 'abc'
