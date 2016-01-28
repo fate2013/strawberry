@@ -37,18 +37,14 @@ local function connect(host, port, user, password, database, conn_timeout, pool_
     })
 
     if not ok then
-        ngx.say("failed to connect: ", err, ": ", errno, " ", sqlstate)
-        return
+        return nil, err, errno, sqlstate
     end
 
     return conn
 end
 
 local function keepalive(conn, keepalive_time, pool_size)
-    local ok, err = conn:set_keepalive(keepalive_time, pool_size)
-    if not ok then
-        ngx.say("failed to set keepalive: ", err)
-    end
+    return conn:set_keepalive(keepalive_time, pool_size)
 end
 
 function Client:query(sql)
@@ -60,8 +56,7 @@ function Client:query(sql)
     local res, err, errno, sqlstate = conn:query(sql)
 
     if not res then
-        ngx.say("bad result: ", err, ": ", errno, ": ", sqlstate, ".")
-        return
+        return nil, err, errno, sqlstate
     end
 
     keepalive(conn, self.keepalive_time, self.pool_size)

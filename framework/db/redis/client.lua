@@ -32,7 +32,7 @@ local function connect(host, port, conn_timeout)
 
     local ok, err = conn:connect(host, port)
     if not ok then
-        ngx.say("failed to connect: ", err)
+        ngx.log(ngx.ERR, "failed to connect: ", err)
         return
     end
 
@@ -42,7 +42,7 @@ end
 local function keepalive(conn, pool_size, keepalive_time)
     local ok, err = conn:set_keepalive(keepalive_time, pool_size)
     if not ok then
-        ngx.say("failed to set keepalive: ", err)
+        ngx.log(ngx.ERR, "failed to set keepalive: ", err)
     end
 end
 

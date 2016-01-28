@@ -5,11 +5,7 @@ Basic guide for lua web framework
 
 *   doc
 
-*   log
-
 *   火焰图
-
-*   new router for unit test
 
 *   Api Test && CI
 
