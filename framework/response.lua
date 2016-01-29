@@ -86,14 +86,14 @@ function Response:send_json(data, code, msg)
     if not code then code = 200 end
     if not msg then msg = "OK" end
     self:setHeader("Content-Type", "application/json")
-    return cjson.encode({status = code, msg = msg, data = data})
+    return cjson.encode({status = code, message = msg, data = data})
 end
 
 function Response:error(code, msg)
     if not code then code = 500 end
     if not msg then msg = "服务器错误" end
     self:setHeader("Content-Type", "application/json")
-    return cjson.encode({status = code, msg = msg, data = {}})
+    return cjson.encode({status = code, message = msg, data = {}})
 end
 
 
