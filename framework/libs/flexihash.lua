@@ -2,9 +2,7 @@
 -- TODO refactor with ffi
 local CRC = require "framework.libs.hasher.crc32"
 
-local Flexihash = {
-    obj = nil
-}
+local Flexihash = {}
 
 Flexihash.__index = Flexihash
 
@@ -20,18 +18,14 @@ end
 function Flexihash:instance(replicas)
     if not replicas then replicas = DEFAULT_REPLICAS end
 
-    if self.obj then
-        return self.obj
-    end
-
-    self.obj = setmetatable({
+    local obj = setmetatable({
         _replicas = replicas,
         _target_count = 0,
         _position_target_pairs = {},
         _target2indexes = {},
         _position_sorted = false,
     }, self)
-    return self.obj
+    return obj
 end
 
 function Flexihash:add_target(target, weight)
