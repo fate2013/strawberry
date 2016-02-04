@@ -87,6 +87,17 @@ function TestController:rediscluster()
     end
 end
 
+function TestController:rediscluster2()
+    local redis_cluster = require "framework.db.redis.cluster"
+    local config = require "test.config.redis"
+    local cluster = redis_cluster:instance("activity", config.cluster.activity)
+    if cluster then
+        return response:new():send_json(cluster:query("get", "dog"))
+    else
+        return "invalid redis cluster specified"
+    end
+end
+
 function TestController:redisclusterop()
     local redis_cluster = require "framework.db.redis.cluster"
     local config = require "test.config.redis"

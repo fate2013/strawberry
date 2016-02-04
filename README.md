@@ -8,5 +8,3 @@ Basic guide for lua web framework
 *   火焰图
 
 *   Api Test && CI
-
-*   Common error output
