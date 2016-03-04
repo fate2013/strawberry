@@ -149,4 +149,10 @@ function TestController:log()
     return 'abc'
 end
 
+function TestController:active_record()
+    local User = require "test.models.user"
+    local user = User:find():where("name", "zhangkh"):one()
+    return response:new():send_json(user)
+end
+
 return TestController

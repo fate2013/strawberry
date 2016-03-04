@@ -5,6 +5,4 @@ Basic guide for lua web framework
 
 *   doc
 
-*   火焰图
-
-*   Api Test && CI
+*   Service Locator
