@@ -6,21 +6,21 @@ local Query = {}
 Query.__index = Query
 
 local function get_conn(query)
-    return query.replica.master
+    return query.replica:master()
 end
 
 function Query:new(model_class)
     local table_name
     if model_class["table_name"] then
-        table_name = model_class:table_name()
+        table_name = model_class.table_name()
     end
     return setmetatable({
-        select = {},
-        from = table_name,
-        where = {},
-        limit = nil,
-        offset = nil,
-        order_by = {},
+        p_select = {},
+        p_from = table_name,
+        p_where = {},
+        p_limit = nil,
+        p_offset = nil,
+        p_order_by = {},
 
         model_class = model_class,
         query_builder = QueryBuilder:new(),
@@ -29,14 +29,14 @@ function Query:new(model_class)
 end
 
 function Query:where(column, value)
-    self.where[column] = value
+    self.p_where[column] = value
     return self
 end
 
 function Query:one()
-    self.limit = 1
+    self.p_limit = 1
     local sql = self.query_builder:build(self)   
-    return get_conn():query_one(sql)
+    return get_conn(self):query_one(sql)
 end
 
 return Query

@@ -45,7 +45,7 @@ local function keepalive(conn, keepalive_time, pool_size)
     return conn:set_keepalive(keepalive_time, pool_size)
 end
 
-local function query(sql)
+local function query(self, sql)
     local conn = connect(self.host, self.port, self.user, self.password,
         self.database, self.conn_timeout, self.pool_size, self.keepalive_time)
     if not conn then
@@ -63,7 +63,7 @@ local function query(sql)
 end
 
 function Connection:query_one(sql)
-    local rows = query(conn, sql)
+    local rows = query(self, sql)
     if rows and #rows > 0 then
         return rows[1]
     end

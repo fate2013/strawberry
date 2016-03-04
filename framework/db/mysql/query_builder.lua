@@ -15,7 +15,7 @@ local function build_select(columns)
     return "SELECT " .. table.concat(select, ",")
 end
 
---TODO
+--TODO multi tables
 local function build_from(table)
     return "FROM " .. table
 end
@@ -23,25 +23,30 @@ end
 local function build_where(condition)
     local where = {}
     for k, v in pairs(condition) do
-        where = tappend(where, k .. "=" .. v)
+        tappend(where, k .. "='" .. v .. "'")
     end
-    local where_str = table.concat(where, " AND ")
+    local where_str = ""
     if #where > 0 then
-        where_str = "WHERE " .. where_str
+        where_str = "WHERE " .. table.concat(where, " AND ")
     end
     return where_str
 end
 
 local function build_limit(limit, offset)
-    return "LIMIT " .. offset .. " " .. limit
+    if limit and offset then
+        return "LIMIT " .. offset .. " " .. limit
+    elseif limit then
+        return "LIMIT " .. limit
+    end
+    return ""
 end
 
 function QueryBuilder:build(query)
     local clauses = {
-        build_select(query.select),
-        build_from(query.from),
-        build_where(query.where),
-        build_limit(query.limit, query.offset),
+        build_select(query.p_select),
+        build_from(query.p_from),
+        build_where(query.p_where),
+        build_limit(query.p_limit, query.p_offset),
     }
     return table.concat(clauses, " ")
 end

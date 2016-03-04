@@ -1,7 +1,12 @@
 local ActiveRecord = require "framework.db.mysql.active_record"
 local mysql_config = require "test.config.mysql"
 
-local User = {}
+local config_group = "default"
+
+local User = {
+    group = config_group,
+    config = mysql_config[config_group],
+}
 User.__index = User
 
 setmetatable(User, {
@@ -9,15 +14,12 @@ setmetatable(User, {
 })
 
 function User:new()
-    print_r(mysql_config.default)
+    print_r(mysql_config)
     return setmetatable({
-        group = "default",
-        --TODO
-        config = mysql_config.default,
     }, User)
 end
 
-function User:table_name()
+function User.table_name()
     return "user"
 end
 
