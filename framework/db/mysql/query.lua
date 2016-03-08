@@ -2,6 +2,8 @@ local QueryBuilder = require "framework.db.mysql.query_builder"
 local Connection = require "framework.db.mysql.connection"
 local Replica = require "framework.db.mysql.replica"
 
+local function tappend(t, v) t[#t+1] = v end
+
 local Query = {}
 Query.__index = Query
 
@@ -28,8 +30,35 @@ function Query:new(model_class)
     }, Query)
 end
 
+-- TODO validate column
+function Query:select(columns)
+    self.p_select = columns
+    return self
+end
+
+function Query:from(table)
+    self.p_from = table
+    return self
+end
+
 function Query:where(column, value)
     self.p_where[column] = value
+    return self
+end
+
+--column: {'field', 'asc/desc'}
+function Query:order_by(column)
+    tappend(self.p_order_by, column)
+    return self
+end
+
+function Query:limit(limit)
+    self.p_limit = limit
+    return self
+end
+
+function Query:offset(offset)
+    self.p_offset = offset
     return self
 end
 
@@ -37,6 +66,11 @@ function Query:one()
     self.p_limit = 1
     local sql = self.query_builder:build(self)   
     return get_conn(self):query_one(sql)
+end
+
+function Query:all()
+    local sql = self.query_builder:build(self)
+    return get_conn(self):query_all(sql)
 end
 
 return Query

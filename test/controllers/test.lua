@@ -151,8 +151,13 @@ end
 
 function TestController:active_record()
     local User = require "test.models.user"
-    local user = User:find():where("name", "zhangkh"):one()
-    print_r(user)
+    local user = User:find()
+        :select({"name"})
+        :from("user")
+        :where("name", "zhangkh")
+        :order_by({'id', 'desc'})
+        :limit(1):offset(0)
+        :all()
     return response:new():send_json(user)
 end
 

@@ -70,15 +70,16 @@ function Connection:query_one(sql)
     return nil
 end
 
+function Connection:query_all(sql)
+    local rows = query(self, sql)
+    return rows
+end
+
 function Connection:insert(sql)
 
 end
 
 function Connection:delete(sql)
-
-end
-
-function Connection:query_all(sql)
 
 end
 

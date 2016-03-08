@@ -11,6 +11,8 @@ local function build_select(columns)
     local select = {}
     if #columns == 0 then
         tappend(select, "*")
+    else 
+        select = columns
     end
     return "SELECT " .. table.concat(select, ",")
 end
@@ -32,9 +34,12 @@ local function build_where(condition)
     return where_str
 end
 
+local function build_order_by()
+end
+
 local function build_limit(limit, offset)
     if limit and offset then
-        return "LIMIT " .. offset .. " " .. limit
+        return "LIMIT " .. offset .. "," .. limit
     elseif limit then
         return "LIMIT " .. limit
     end
@@ -46,6 +51,7 @@ function QueryBuilder:build(query)
         build_select(query.p_select),
         build_from(query.p_from),
         build_where(query.p_where),
+        build_order_by(query.p_order_by),
         build_limit(query.p_limit, query.p_offset),
     }
     return table.concat(clauses, " ")
