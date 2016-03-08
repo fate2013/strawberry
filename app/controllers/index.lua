@@ -5,8 +5,8 @@ local IndexController = {}
 function IndexController:index()
     local view = self:getView()
     local p = {}
-    p['vanilla'] = 'Welcome To Vanilla...'
-    p['zhoujing'] = 'Power by Openresty'
+    p['test1'] = 'Welcome ...'
+    p['test2'] = 'Powered by Openresty'
     view:assign(p)
     return view:display()
 end
