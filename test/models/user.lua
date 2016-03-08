@@ -1,26 +1,15 @@
 local ActiveRecord = require "framework.db.mysql.active_record"
 local mysql_config = require "test.config.mysql"
 
-local config_group = "default"
-
 local User = {
-    group = config_group,
-    config = mysql_config[config_group],
+    table_name = "user",
+    config_group = "default",
+    config = mysql_config["default"],
 }
 User.__index = User
 
 setmetatable(User, {
-    __index = ActiveRecord, -- this is what makes the inheritance work
+    __index = ActiveRecord,
 })
-
-function User:new()
-    print_r(mysql_config)
-    return setmetatable({
-    }, User)
-end
-
-function User.table_name()
-    return "user"
-end
 
 return User

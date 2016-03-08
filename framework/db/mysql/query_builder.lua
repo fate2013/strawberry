@@ -23,18 +23,32 @@ local function build_from(table)
 end
 
 local function build_where(condition)
-    local where = {}
-    for k, v in pairs(condition) do
-        tappend(where, k .. "='" .. v .. "'")
-    end
     local where_str = ""
-    if #where > 0 then
-        where_str = "WHERE " .. table.concat(where, " AND ")
+    if #condition > 0 then
+        where_str = "WHERE " .. table.concat(condition, " AND ")
     end
     return where_str
 end
 
-local function build_order_by()
+local function build_group_by(columns)
+    if #columns == 0 then
+        return ""
+    end
+    return "GROUP BY " .. table.concat(columns, ",")
+end
+
+local function build_order_by(columns)
+    if #columns == 0 then
+        return ""
+    end
+    local order_by = {}
+    if #columns > 0 then
+        for k, column in ipairs(columns) do
+            local order_str = table.concat(column, " ")
+            tappend(order_by, order_str)
+        end
+    end
+    return "ORDER BY " .. table.concat(order_by, ",")
 end
 
 local function build_limit(limit, offset)
@@ -51,10 +65,17 @@ function QueryBuilder:build(query)
         build_select(query.p_select),
         build_from(query.p_from),
         build_where(query.p_where),
+        build_group_by(query.p_group_by),
         build_order_by(query.p_order_by),
         build_limit(query.p_limit, query.p_offset),
     }
-    return table.concat(clauses, " ")
+    local non_empty_clauses = {}
+    for k, clause in ipairs(clauses) do
+        if clause ~= "" then
+            tappend(non_empty_clauses, clause)
+        end
+    end
+    return table.concat(non_empty_clauses, " ")
 end
 
 return QueryBuilder

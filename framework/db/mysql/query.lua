@@ -12,25 +12,32 @@ local function get_conn(query)
 end
 
 function Query:new(model_class)
-    local table_name
-    if model_class["table_name"] then
-        table_name = model_class.table_name()
-    end
     return setmetatable({
+        as_array = false,
+
         p_select = {},
-        p_from = table_name,
+        p_from = model_class.table_name,
         p_where = {},
         p_limit = nil,
         p_offset = nil,
         p_order_by = {},
+        p_group_by = {},
 
         model_class = model_class,
         query_builder = QueryBuilder:new(),
-        replica = Replica:instance(model_class.group, model_class.config),
+        replica = Replica:instance(model_class.config_group, model_class.config),
     }, Query)
 end
 
--- TODO validate column
+function Query:as_array(tobe)
+    if tobe == nil then
+        tobe = true
+    end
+    self.as_array = tobe
+    return self
+end
+
+-- TODO auto schema and validate column
 function Query:select(columns)
     self.p_select = columns
     return self
@@ -42,7 +49,41 @@ function Query:from(table)
 end
 
 function Query:where(column, value)
-    self.p_where[column] = value
+    tappend(self.p_where, column .. "='" .. value .. "'")
+    return self
+end
+
+function Query:where_in(column, values)
+    tappend(self.p_where, column .. " in ('" .. table.concat(values, "','") .. "')")
+    return self
+end
+
+function Query:where_like(column, like)
+    tappend(self.p_where, column .. " like '" .. like .. "'")
+    return self
+end
+
+local function parse_multi_conditions(conditions)
+    local comp = string.upper(conditions[1])
+    table.remove(conditions, 1)
+    local where_list = {}
+    for _, condition in ipairs(conditions) do
+        if type(condition) == "table" then
+            tappend(where_list, parse_multi_conditions(condition))
+        else
+            tappend(where_list, condition)
+        end
+    end
+    return "(" .. table.concat(where_list, " " .. comp .. " ") .. ")"
+end
+
+function Query:where_multi(conditions)
+    tappend(self.p_where, parse_multi_conditions(conditions))
+    return self
+end
+
+function Query:group_by(column)
+    tappend(self.p_group_by, column)
     return self
 end
 
@@ -65,11 +106,16 @@ end
 function Query:one()
     self.p_limit = 1
     local sql = self.query_builder:build(self)   
-    return get_conn(self):query_one(sql)
+    local row = get_conn(self):query_one(sql)
+    if self.as_array then
+        return row
+    end
+    return self.model_class:new(row)
 end
 
 function Query:all()
     local sql = self.query_builder:build(self)
+    print_r(sql)
     return get_conn(self):query_all(sql)
 end
 
