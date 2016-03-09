@@ -7,8 +7,16 @@ local function tappend(t, v) t[#t+1] = v end
 local Query = {}
 Query.__index = Query
 
-local function get_conn(query)
+local function get_master_conn(query)
     return query.replica:master()
+end
+
+local function get_slave_conn(query)
+    local conn = query.replica:slave()
+    if not conn then
+        conn = get_master_conn(query)
+    end
+    return conn
 end
 
 function Query:new(model_class)
@@ -43,8 +51,8 @@ function Query:select(columns)
     return self
 end
 
-function Query:from(table)
-    self.p_from = table
+function Query:from(table_name)
+    self.p_from = table_name
     return self
 end
 
@@ -106,17 +114,34 @@ end
 function Query:one()
     self.p_limit = 1
     local sql = self.query_builder:build(self)   
-    local row = get_conn(self):query_one(sql)
+    local row = get_slave_conn(self):query_one(sql)
     if self.as_array then
         return row
     end
-    return self.model_class:new(row)
+    return self.model_class:new(row, true)
 end
 
 function Query:all()
     local sql = self.query_builder:build(self)
-    print_r(sql)
-    return get_conn(self):query_all(sql)
+    local rows = get_slave_conn(self):query_all(sql)
+    if self.as_array then
+        return rows
+    end
+    local models = {}
+    for _, row in ipairs(rows) do
+        tappend(models, self.model_class:new(row, true))
+    end
+    return models
+end
+
+function Query:insert(table_name, columns)
+    local sql = self.query_builder:insert(table_name, columns)
+    return get_master_conn(self):execute(sql)
+end
+
+function Query:update(table_name, columns, primary_key)
+    local sql = self.query_builder:update(table_name, columns, primary_key)
+    return get_master_conn(self):execute(sql)
 end
 
 return Query

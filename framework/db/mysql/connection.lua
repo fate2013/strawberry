@@ -71,16 +71,11 @@ function Connection:query_one(sql)
 end
 
 function Connection:query_all(sql)
-    local rows = query(self, sql)
-    return rows
+    return query(self, sql)
 end
 
-function Connection:insert(sql)
-
-end
-
-function Connection:delete(sql)
-
+function Connection:execute(sql)
+    return query(self, sql)   
 end
 
 return Connection

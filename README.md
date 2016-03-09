@@ -29,6 +29,8 @@ An openresty web framework, contains MVC and ORM
 
 ### TODO
 
+*   unittest(luaunit)
+
 *	more doc
 
 *   Service Locator

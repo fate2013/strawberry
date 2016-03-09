@@ -1,4 +1,5 @@
 local response = require "framework.response"
+    local User = require "test.models.user"
 
 local TestController = {}
 
@@ -149,8 +150,7 @@ function TestController:log()
     return 'abc'
 end
 
-function TestController:active_record()
-    local User = require "test.models.user"
+function TestController:active_record_get()
     local user = User:find()
         :select({"name"})
         :from("user")
@@ -164,6 +164,25 @@ function TestController:active_record()
         :limit(2):offset(0)
         :one()
     return response:new():send_json(user:to_array())
+end
+
+function TestController:active_record_new()
+    local user = User:new()
+    user.name = 'syt'
+    user.phone = '13500000000'
+    user.pwd = ngx.md5('123456')
+    print_r(user:save())
+
+    return response:new():success()
+end
+
+function TestController:active_record_update()
+    local user = User:find():one()
+    user.name = 'zhangkh'
+    user.phone = '15652918035'
+    user:save()
+
+    return response:new():success()
 end
 
 return TestController

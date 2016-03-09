@@ -78,4 +78,29 @@ function QueryBuilder:build(query)
     return table.concat(non_empty_clauses, " ")
 end
 
+function QueryBuilder:insert(table_name, columns)
+    local keys = {}
+    local values = {}
+    for k, v in pairs(columns) do
+        tappend(keys, k)
+        tappend(values, v)
+    end
+    local sql = "INSERT INTO " .. table_name ..
+        "(" .. table.concat(keys, ",") .. ")" ..
+        " VALUES('" .. table.concat(values, "','") .. "')"
+    return sql
+end
+
+function QueryBuilder:update(table_name, columns, primary_key)
+    local set_clause = "SET "
+    local sets = {}
+    for k, v in pairs(columns) do
+        tappend(sets, k .. "='" .. v .. "'")
+    end
+    local sql = "UPDATE " .. table_name ..
+        " SET " .. table.concat(sets, ",") ..
+        " WHERE id=" .. primary_key
+    return sql
+end
+
 return QueryBuilder
