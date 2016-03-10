@@ -1,23 +1,10 @@
 local QueryBuilder = require "framework.db.mysql.query_builder"
 local Connection = require "framework.db.mysql.connection"
-local Replica = require "framework.db.mysql.replica"
 
 local function tappend(t, v) t[#t+1] = v end
 
 local Query = {}
 Query.__index = Query
-
-local function get_master_conn(query)
-    return query.replica:master()
-end
-
-local function get_slave_conn(query)
-    local conn = query.replica:slave()
-    if not conn then
-        conn = get_master_conn(query)
-    end
-    return conn
-end
 
 function Query:new(model_class)
     return setmetatable({
@@ -33,7 +20,6 @@ function Query:new(model_class)
 
         model_class = model_class,
         query_builder = QueryBuilder:new(),
-        replica = Replica:instance(model_class.config_group, model_class.config),
     }, Query)
 end
 
@@ -45,7 +31,6 @@ function Query:as_array(tobe)
     return self
 end
 
--- TODO auto schema and validate column
 function Query:select(columns)
     self.p_select = columns
     return self
@@ -114,7 +99,7 @@ end
 function Query:one()
     self.p_limit = 1
     local sql = self.query_builder:build(self)   
-    local row = get_slave_conn(self):query_one(sql)
+    local row = self.model_class:get_slave_conn():query_one(sql)
     if self.as_array then
         return row
     end
@@ -123,7 +108,7 @@ end
 
 function Query:all()
     local sql = self.query_builder:build(self)
-    local rows = get_slave_conn(self):query_all(sql)
+    local rows = self.model_class:get_slave_conn():query_all(sql)
     if self.as_array then
         return rows
     end
@@ -136,12 +121,12 @@ end
 
 function Query:insert(table_name, columns)
     local sql = self.query_builder:insert(table_name, columns)
-    return get_master_conn(self):execute(sql)
+    return self.model_class:get_master_conn():execute(sql)
 end
 
 function Query:update(table_name, columns, primary_key)
     local sql = self.query_builder:update(table_name, columns, primary_key)
-    return get_master_conn(self):execute(sql)
+    return self.model_class:get_master_conn():execute(sql)
 end
 
 return Query

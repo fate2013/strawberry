@@ -178,8 +178,8 @@ end
 
 function TestController:active_record_update()
     local user = User:find():one()
-    user.name = 'zhangkh'
-    user.phone = '15652918035'
+    user.name = 'zhangkh3'
+    user.phone = '15652918031'
     user:save()
 
     return response:new():success()
