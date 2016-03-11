@@ -213,4 +213,14 @@ function TestController:active_record_belongs_to()
     return response:new():send_json(user:to_array())
 end
 
+function TestController:active_record_belongs_to_many()
+    local user = User:find():one()
+    local roles = user:roles():get()
+    local role_list = {}
+    for _, role in ipairs(roles) do
+        tappend(role_list, role:to_array())
+    end
+    return response:new():send_json(role_list)
+end
+
 return TestController

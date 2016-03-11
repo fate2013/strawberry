@@ -22,4 +22,9 @@ function User:orders()
     return self:has_many(Order)
 end
 
+function User:roles()
+    local Role = require "test.models.role"
+    return self:belongs_to_many(Role)
+end
+
 return User
