@@ -12,4 +12,14 @@ setmetatable(User, {
     __index = ActiveRecord,
 })
 
+function User:profile()
+    local Profile = require "test.models.profile"
+    return self:has_one(Profile)
+end
+
+function User:orders()
+    local Order = require "test.models.order"
+    return self:has_many(Order)
+end
+
 return User

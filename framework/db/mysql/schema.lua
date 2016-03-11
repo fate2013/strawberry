@@ -18,6 +18,7 @@ local function load_columns(self)
     end
 end
 
+-- TODO auto load primary key
 function Schema:load_table_schema()
     load_columns(self)
 end

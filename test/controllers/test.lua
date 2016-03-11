@@ -1,5 +1,8 @@
 local response = require "framework.response"
-    local User = require "test.models.user"
+local User = require "test.models.user"
+local Profile = require "test.models.profile"
+
+local function tappend(t, v) t[#t+1] = v end
 
 local TestController = {}
 
@@ -153,7 +156,7 @@ end
 function TestController:active_record_get()
     local user = User:find()
         :select({"name"})
-        :from("user")
+        --:from("user")
         --:where("name", "zhangkh")
         --:where_in("name", {"zhangkh", "zcc"})
         --:where_like("name", "z%")
@@ -171,18 +174,43 @@ function TestController:active_record_new()
     user.name = 'syt'
     user.phone = '13500000000'
     user.pwd = ngx.md5('123456')
-    print_r(user:save())
+    user:save()
 
     return response:new():success()
 end
 
 function TestController:active_record_update()
     local user = User:find():one()
-    user.name = 'zhangkh3'
-    user.phone = '15652918031'
+    user.name = 'zhangkh'
+    user.phone = '15652918035'
     user:save()
 
     return response:new():success()
+end
+
+function TestController:active_record_has_one()
+    local user = User:find():one()
+    local profile = user:profile():get()
+    profile.height = 180
+    profile:save()
+    return response:new():send_json(profile:to_array())
+end
+
+function TestController:active_record_has_many()
+    local user = User:find():one()
+    local orders = user:orders():get()
+    local order_list = {}
+    for _, order in ipairs(orders) do
+        tappend(order_list, order:to_array())
+    end
+
+    return response:new():send_json(order_list)
+end
+
+function TestController:active_record_belongs_to()
+    local profile = Profile:find():one()
+    local user = profile:user():get()
+    return response:new():send_json(user:to_array())
 end
 
 return TestController

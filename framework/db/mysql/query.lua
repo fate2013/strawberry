@@ -3,7 +3,9 @@ local Connection = require "framework.db.mysql.connection"
 
 local function tappend(t, v) t[#t+1] = v end
 
-local Query = {}
+local Query = {
+    is_query = true,
+}
 Query.__index = Query
 
 function Query:new(model_class)
@@ -20,6 +22,8 @@ function Query:new(model_class)
 
         model_class = model_class,
         query_builder = QueryBuilder:new(),
+
+        multiple = false,
     }, Query)
 end
 
@@ -127,6 +131,14 @@ end
 function Query:update(table_name, columns, primary_key)
     local sql = self.query_builder:update(table_name, columns, primary_key)
     return self.model_class:get_master_conn():execute(sql)
+end
+
+function Query:get()
+    if self.multiple then
+        return self:all()
+    else
+        return self:one()
+    end
 end
 
 return Query

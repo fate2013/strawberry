@@ -12,7 +12,22 @@ local ActiveRecord = {
 }
 
 ActiveRecord.__index = ActiveRecord
- 
+
+local function recursive_index(table, key)
+    local index = rawget(table, "__index")
+    if index then
+        if index[key] then
+            return index[key]
+        elseif type(index) == "table" then
+            return recursive_index(index, key)
+        else
+            return nil
+        end
+    end
+
+    return nil
+end
+
 function ActiveRecord:new(row, from_db)
     if from_db == nil then from_db = false end
     if row == nil then row = {} end
@@ -21,7 +36,7 @@ function ActiveRecord:new(row, from_db)
         is_new = not from_db,
         updated_columns = {},
     }
-    setmetatable(model, {
+    return setmetatable(model, {
         __newindex = function(table, key, value)
             if self:get_columns()[key] then
                 rawset(table.updated_columns, key, value)
@@ -30,9 +45,22 @@ function ActiveRecord:new(row, from_db)
                 rawset(table, key, value)
             end
         end,
-        __index = self,
+        __index = function(table, key)
+            local value = rawget(table, "attributes")[key]
+                if value then
+                return value
+            end
+            value = rawget(table, key)
+            if value then
+                return value
+            end
+            return recursive_index(self, key)
+        end
     })
-    return model
+end
+
+function ActiveRecord:get_key()
+    return self[self.primary_key]
 end
 
 function ActiveRecord:get_replica()
@@ -105,6 +133,36 @@ function ActiveRecord:save()
         end
         return success
     end
+end
+
+function ActiveRecord:has_one(class, foreign_key)
+    local query = class:find()
+    if not foreign_key then
+        foreign_key = self.table_name .. "_id"
+    end
+    query:where(foreign_key, self:get_key())
+    query.multiple = false
+    return query
+end
+
+function ActiveRecord:has_many(class, foreign_key)
+    local query = class:find()
+    if not foreign_key then
+        foreign_key = self.table_name .. "_id"
+    end
+    query:where(foreign_key, self:get_key())
+    query.multiple = true
+    return query
+end
+
+function ActiveRecord:belongs_to(class, foreign_key)
+    local query = class:find()
+    if not foreign_key then
+        foreign_key = class.table_name .. "_id"
+    end
+    query:where(class.primary_key, self[foreign_key])
+    query.multiple = false
+    return query
 end
 
 function ActiveRecord:to_array()
