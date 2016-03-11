@@ -23,13 +23,38 @@ An openresty web framework, contains MVC and ORM
 	-	write controller to process requests. Reference app/controllers/index.lua
 	-	write models to hold reusable business code
 
+
 ###	Architecture
+
+                       client
+                        +  ^
+                request |  |response
+                        |  |
+                        v  +
+                    application
+                         +
+                         | route
+                         |
+                         v
+                 controller:action
+                   +            +
+                   |            |
+         relation  v            v
+ar+-+ar+----------+ar     redis_cluster
+                   +            +
+     query_builder |            |
+                   v            v
+               connection   connection
+                   +            +
+                   |            |
+                   v            v
+                 mysql        redis
 
 
 
 ### TODO
 
-*   unittest(luaunit)
+*   more unittest
 
 *	more doc
 
