@@ -26,29 +26,29 @@ An openresty web framework, contains MVC and ORM
 
 ###	Architecture
 
-                       client
-                        +  ^
-                request |  |response
-                        |  |
-                        v  +
-                    application
-                         +
-                         | route
-                         |
-                         v
-                 controller:action
-                   +            +
-                   |            |
-         relation  v            v
-ar+-+ar+----------+ar     redis_cluster
-                   +            +
-     query_builder |            |
-                   v            v
-               connection   connection
-                   +            +
-                   |            |
-                   v            v
-                 mysql        redis
+                           client
+                            +  ^
+                    request |  |response
+                            |  |
+                            v  +
+                        application
+                             +
+                             | route
+                             |
+                             v
+                     controller:action
+                       +            +
+                       |            |
+             relation  v            v
+    ar+-+ar+----------+ar     redis_cluster
+                       +            +
+         query_builder |            |
+                       v            v
+                   connection   connection
+                       +            +
+                       |            |
+                       v            v
+                     mysql        redis
 
 
 
