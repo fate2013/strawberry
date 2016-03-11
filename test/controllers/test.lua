@@ -1,6 +1,7 @@
 local response = require "framework.response"
 local User = require "test.models.user"
 local Profile = require "test.models.profile"
+local Role = require "test.models.role"
 
 local function tappend(t, v) t[#t+1] = v end
 
@@ -220,7 +221,17 @@ function TestController:active_record_belongs_to_many()
     for _, role in ipairs(roles) do
         tappend(role_list, role:to_array())
     end
-    return response:new():send_json(role_list)
+
+    local role = Role:find():one()
+    local users = role:users():get()
+    local user_list = {}
+    for _, user in ipairs(users) do
+        tappend(user_list, user:to_array())
+    end
+    return response:new():send_json({
+        roles = role_list,
+        users = user_list,
+    })
 end
 
 return TestController

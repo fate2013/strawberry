@@ -12,4 +12,9 @@ setmetatable(Role, {
     __index = ActiveRecord,
 })
 
+function Role:users()
+    local User = require "test.models.user"
+    return self:belongs_to_many(User)
+end
+
 return Role
