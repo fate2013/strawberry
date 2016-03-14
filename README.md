@@ -33,12 +33,12 @@ It's an openresty web framework, contains MVC and ORM
 
                            client
                             +  ^
-                    request |  |response
+                    request |  | response
                             |  |
                             v  +
                         application
                              +
-                             | route
+                             | dispatch
                              |
                              v
                      controller:action
@@ -109,6 +109,12 @@ It's an openresty web framework, contains MVC and ORM
 *	as_array: return array instead of model instance
 
 #####	Relation
+*	Declare
+	-	use getter method to declare a relation, eg:
+				function User:get_profile()
+            		return self:has_one(Profile)
+    			end
+
 *	has one
 	-	return one-one relation, foreign key in destination table
 

@@ -133,7 +133,7 @@ function Query:update(table_name, columns, primary_key)
     return self.model_class:get_master_conn():execute(sql)
 end
 
-function Query:get()
+function Query:find_for(key)
     if self.multiple then
         return self:all()
     else

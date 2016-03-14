@@ -182,7 +182,7 @@ end
 
 function TestController:active_record_update()
     local user = User:find():one()
-    user.name = 'zhangkh'
+    user.name = 'zhangkh3'
     user.phone = '15652918035'
     user:save()
 
@@ -191,15 +191,15 @@ end
 
 function TestController:active_record_has_one()
     local user = User:find():one()
-    local profile = user:profile():get()
-    profile.height = 180
+    local profile = user.profile
+    profile.height = 182
     profile:save()
     return response:new():send_json(profile:to_array())
 end
 
 function TestController:active_record_has_many()
     local user = User:find():one()
-    local orders = user:orders():get()
+    local orders = user.orders
     local order_list = {}
     for _, order in ipairs(orders) do
         tappend(order_list, order:to_array())
@@ -210,20 +210,21 @@ end
 
 function TestController:active_record_belongs_to()
     local profile = Profile:find():one()
-    local user = profile:user():get()
+    local user = profile.user
     return response:new():send_json(user:to_array())
 end
 
 function TestController:active_record_belongs_to_many()
     local user = User:find():one()
-    local roles = user:roles():get()
+    local roles = user.roles
     local role_list = {}
     for _, role in ipairs(roles) do
         tappend(role_list, role:to_array())
     end
+    roles = user.roles
 
     local role = Role:find():one()
-    local users = role:users():get()
+    local users = role.users
     local user_list = {}
     for _, user in ipairs(users) do
         tappend(user_list, user:to_array())

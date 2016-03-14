@@ -1,3 +1,4 @@
+--Deprecated
 local mysql = require "resty.mysql"
 
 local Client = {

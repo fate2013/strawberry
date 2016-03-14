@@ -15,13 +15,45 @@ local ActiveRecord = {
 
 ActiveRecord.__index = ActiveRecord
 
-local function recursive_index(table, key)
+local function get_relation(query, key, base_model)
+    if base_model.related[key] then
+        return base_model.related[key]
+    end
+    local relation = query:find_for(key)
+    base_model.related[key] = relation
+    return relation
+end
+
+local function recursive_index(table, key, base_table)
+    local value = rawget(table, "attributes")[key]
+    if value then
+        return value
+    end
+    value = rawget(table, key)
+    if value then
+        return value
+    end
     local index = rawget(table, "__index")
     if index then
-        if index[key] then
-            return index[key]
+        local getter = "get_" .. key
+        local value = index[getter]
+        if value then
+            if type(value) == "function" then
+                local res = value(base_table)
+                if res.is_query then
+                    -- relation
+                    return get_relation(res, key, base_table)
+                else
+                    return res
+                end
+            end
+            return value
+        end
+        value = index[key]
+        if value then
+            return value
         elseif type(index) == "table" then
-            return recursive_index(index, key)
+            return recursive_index(index, key, base_table)
         else
             return nil
         end
@@ -37,7 +69,9 @@ function ActiveRecord:new(row, from_db)
         attributes = row,
         is_new = not from_db,
         updated_columns = {},
+        related = {},
     }
+    model.__index = self
     return setmetatable(model, {
         __newindex = function(table, key, value)
             if self:get_columns()[key] then
@@ -48,15 +82,7 @@ function ActiveRecord:new(row, from_db)
             end
         end,
         __index = function(table, key)
-            local value = rawget(table, "attributes")[key]
-                if value then
-                return value
-            end
-            value = rawget(table, key)
-            if value then
-                return value
-            end
-            return recursive_index(self, key)
+            return recursive_index(table, key, table)
         end
     })
 end
@@ -66,11 +92,13 @@ function ActiveRecord:get_key()
 end
 
 function ActiveRecord:get_replica()
-    if self.replica then
-        return self.replica
+    local replica = rawget(self, "replica")
+    if replica then
+        return replica
     end
-    self.replica = Replica:instance(self.config_group, self.config)
-    return self.replica
+    replica = Replica:instance(self.config_group, self.config)
+    rawset(self, "replica", replica)
+    return replica
 end
 
 function ActiveRecord:get_master_conn()
@@ -86,14 +114,15 @@ function ActiveRecord:get_slave_conn()
 end
 
 function ActiveRecord:get_table_schema()
-    if self.table_schema then
-        return self.table_schema
+    local table_schema = rawget(self, "table_schema")
+    if table_schema then
+        return table_schema
     end
 
-    local table_schema = Schema:new(self)
+    table_schema = Schema:new(self)
     table_schema:load_table_schema()
-    self.table_schema = table_schema
-    return self.table_schema
+    rawset(self, "table_schema", table_schema)
+    return table_schema
 end
 
 function ActiveRecord:get_columns()
@@ -137,6 +166,7 @@ function ActiveRecord:save()
     end
 end
 
+-- Relations
 function ActiveRecord:has_one(class, foreign_key)
     local query = class:find()
     if not foreign_key then

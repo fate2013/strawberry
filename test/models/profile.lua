@@ -12,7 +12,7 @@ setmetatable(Profile, {
     __index = ActiveRecord,
 })
 
-function Profile:user()
+function Profile:get_user()
     local User = require "test.models.user"
     return self:belongs_to(User)
 end
