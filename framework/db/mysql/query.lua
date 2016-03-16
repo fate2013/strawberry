@@ -27,6 +27,7 @@ function Query:new(model_class)
         foreign_key = nil,
         local_key = nil,
         primary_model = nil,
+        pivot = nil,
 
         multiple = false,
     }, Query)
@@ -194,6 +195,9 @@ end
 
 -- TODO index by feature
 local function populate(self, rows)
+    if not rows then
+        return nil
+    end
     if self.p_as_array then
         if #self.p_with > 0 then
             find_with(self, rows)
@@ -234,11 +238,23 @@ function Query:update(table_name, columns, primary_key)
 end
 
 function Query:find_for(key)
-    self:where(self.foreign_key, self.primary_model[self.local_key])
-    if self.multiple then
-        return self:all()
+    if self.pivot then
+        local pivot_rows = Query:new(self.model_class)
+            :from(self.pivot.table)
+            :where(self.pivot.foreign_key, self.primary_model[self.local_key])
+            :all()
+        local keys = {}
+        for _, row in ipairs(pivot_rows) do
+            tappend(keys, row[self.pivot.other_key])
+        end
+        return self:where_in(self.foreign_key, keys):all()
     else
-        return self:one()
+        self:where(self.foreign_key, self.primary_model[self.local_key])
+        if self.multiple then
+            return self:all()
+        else
+            return self:one()
+        end
     end
 end
 

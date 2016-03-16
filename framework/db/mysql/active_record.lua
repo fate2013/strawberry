@@ -206,13 +206,13 @@ function ActiveRecord:belongs_to(class, local_key)
     return query
 end
 
-function ActiveRecord:belongs_to_many(class, junction_table, foreign_key, other_key)
-    local query = self:find()
-    if not junction_table then
+function ActiveRecord:belongs_to_many(class, pivot_table, foreign_key, other_key, local_key, other_local_key)
+    local query = class:find()
+    if not pivot_table then
         if self.table_name < class.table_name then
-            junction_table = self.table_name .. "_" .. class.table_name
+            pivot_table = self.table_name .. "_" .. class.table_name
         else
-            junction_table = class.table_name .. "_" .. self.table_name
+            pivot_table = class.table_name .. "_" .. self.table_name
         end
     end
     if not foreign_key then
@@ -221,14 +221,21 @@ function ActiveRecord:belongs_to_many(class, junction_table, foreign_key, other_
     if not other_key then
         other_key = class.table_name .. "_id"
     end
-    local junction_rows = query:from(junction_table):where(foreign_key, self:get_key()):all()
-    local keys = {}
-    for _, row in ipairs(junction_rows) do
-        tappend(keys, row[other_key])
+    if not local_key then
+        local_key = self.primary_key
     end
-    query = class:find()
-    query:where_in(class.primary_key, keys):all()
-    query.multiple = true
+    if not other_local_key then
+        other_local_key = class.primary_key
+    end
+    local pivot = {
+        table = pivot_table,
+        foreign_key = foreign_key,
+        other_key = other_key,
+    }
+    query.primary_model = self
+    query.local_key = local_key
+    query.foreign_key = other_local_key
+    query.pivot = pivot
     return query
 end
 
