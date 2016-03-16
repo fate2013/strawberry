@@ -191,10 +191,10 @@ end
 
 function TestController:active_record_has_one()
     local user = User:find():one()
-    local profile = user.profile
-    profile.height = 182
-    profile:save()
-    return response:new():send_json(profile:to_array())
+    local user_addr = user.profile.user_addr
+    user_addr.addr = "aaa"
+    user_addr:save()
+    return response:new():send_json(user_addr:to_array())
 end
 
 function TestController:active_record_has_many()
@@ -221,7 +221,6 @@ function TestController:active_record_belongs_to_many()
     for _, role in ipairs(roles) do
         tappend(role_list, role:to_array())
     end
-    roles = user.roles
 
     local role = Role:find():one()
     local users = role.users
@@ -233,6 +232,24 @@ function TestController:active_record_belongs_to_many()
         roles = role_list,
         users = user_list,
     })
+end
+
+function TestController:active_record_has_one_with()
+    local user = User:find():with("profile.user_addr"):as_array():one()
+    return response:new():send_json(user.profile.user_addr)
+end
+
+function TestController:active_record_has_many_with()
+    local user = User:find():with("orders"):as_array():one()
+    local orders = user.orders
+
+    return response:new():send_json(orders)
+end
+
+function TestController:active_record_belongs_to_with()
+    local profile = Profile:find():with("user"):as_array():one()
+    local user = profile.user
+    return response:new():send_json(user)
 end
 
 return TestController

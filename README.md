@@ -129,8 +129,6 @@ It's an openresty web framework, contains MVC and ORM
 
 
 ### TODO
-*	eager loading of relation
-
 *   more unittest
 
 *	more doc

@@ -17,4 +17,9 @@ function Profile:get_user()
     return self:belongs_to(User)
 end
 
+function Profile:get_user_addr()
+    local UserAddr = require "test.models.user_addr"
+    return self:has_one(UserAddr)
+end
+
 return Profile

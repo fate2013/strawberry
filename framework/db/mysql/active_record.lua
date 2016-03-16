@@ -25,7 +25,7 @@ local function get_relation(query, key, base_model)
 end
 
 local function recursive_index(table, key, base_table)
-    local value = rawget(table, "attributes")[key]
+    local value = rawget(base_table, "attributes")[key]
     if value then
         return value
     end
@@ -34,6 +34,9 @@ local function recursive_index(table, key, base_table)
         return value
     end
     local index = rawget(table, "__index")
+    if index == table then
+        return nil
+    end
     if index then
         local getter = "get_" .. key
         local value = index[getter]
@@ -172,7 +175,9 @@ function ActiveRecord:has_one(class, foreign_key)
     if not foreign_key then
         foreign_key = self.table_name .. "_id"
     end
-    query:where(foreign_key, self:get_key())
+    query.local_key = self.primary_key
+    query.foreign_key = foreign_key
+    query.primary_model = self
     query.multiple = false
     return query
 end
@@ -182,17 +187,21 @@ function ActiveRecord:has_many(class, foreign_key)
     if not foreign_key then
         foreign_key = self.table_name .. "_id"
     end
-    query:where(foreign_key, self:get_key())
+    query.local_key = self.primary_key
+    query.foreign_key = foreign_key
+    query.primary_model = self
     query.multiple = true
     return query
 end
 
-function ActiveRecord:belongs_to(class, foreign_key)
+function ActiveRecord:belongs_to(class, local_key)
     local query = class:find()
-    if not foreign_key then
-        foreign_key = class.table_name .. "_id"
+    if not local_key then
+        local_key = class.table_name .. "_id"
     end
-    query:where(class.primary_key, self[foreign_key])
+    query.local_key = local_key
+    query.foreign_key = class.primary_key
+    query.primary_model = self
     query.multiple = false
     return query
 end
@@ -225,6 +234,19 @@ end
 
 function ActiveRecord:to_array()
     return self.attributes
+end
+
+function ActiveRecord:get_relation(name)
+    local getter = "get_" .. name
+    if self[getter] then
+        return self[getter](self)
+    else
+        return nil
+    end
+end
+
+function ActiveRecord:populate_relation(name, records)
+    self.related[name] = records
 end
 
 return ActiveRecord
