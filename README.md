@@ -110,6 +110,8 @@ It's an openresty web framework, contains MVC and ORM
 *	as_array: return array instead of model instance
 	-	can get 27% performance promotion
 
+*	performance: use ORM will cause about 20% performance decline
+
 #####	Relation
 *	Declare
 	-	use getter method to declare a relation, eg:
