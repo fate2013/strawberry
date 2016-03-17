@@ -163,8 +163,8 @@ function TestController:active_record_get()
         --:where_like("name", "z%")
         :where_multi({"or", "name='zhangkh'", {"and", "id=2", "name='zcc'"}})
         :group_by('name')
-        --:order_by({'id', 'desc'})
-        --:order_by({'name', 'asc'})
+        --:order_by('id', 'desc')
+        --:order_by('name', 'asc')
         :limit(2):offset(0)
         :one()
     return response:new():send_json(user:to_array())
@@ -217,20 +217,21 @@ end
 function TestController:active_record_belongs_to_many()
     local user = User:find():one()
     local roles = user.roles
-    local role_list = {}
+    local roles_list = {}
     for _, role in ipairs(roles) do
-        tappend(role_list, role:to_array())
+        tappend(roles_list, role:to_array())
     end
 
     local role = Role:find():one()
     local users = role.users
-    local user_list = {}
+    local users_list = {}
     for _, user in ipairs(users) do
-        tappend(user_list, user:to_array())
+        tappend(users_list, user:to_array())
     end
+
     return response:new():send_json({
-        roles = role_list,
-        users = user_list,
+        roles = roles_list,
+        users = users_list,
     })
 end
 
@@ -250,6 +251,18 @@ function TestController:active_record_belongs_to_with()
     local profile = Profile:find():with("user"):as_array():one()
     local user = profile.user
     return response:new():send_json(user)
+end
+
+function TestController:active_record_belongs_to_many_with()
+    local user = User:find():with("roles"):as_array():one()
+    local roles = user.roles
+
+    local role = Role:find():order_by("id", "desc"):with("users"):as_array():one()
+    local users = role.users
+    return response:new():send_json({
+        roles = roles,
+        users = users,
+    })   
 end
 
 return TestController

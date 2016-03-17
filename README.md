@@ -118,6 +118,9 @@ It's an openresty web framework, contains MVC and ORM
 *	has one
 	-	return one-one relation, foreign key in destination table
 
+*	belongs to
+	-	return one-one or many-one relation, foreign key in source table
+
 *	has many
 	-	return one-many relation
 
@@ -125,10 +128,15 @@ It's an openresty web framework, contains MVC and ORM
 	-	return many-many relation which has a junction table
 	-	by default, junction table is the two related model names joined in alphabetical order
 
+*	eager loading(with)
+	-	eager load relations, eliminate n+1 queries
+
 *	example: see test/models/user.lua
 
 
 ### TODO
+*	unify tappend
+
 *   more unittest
 
 *	more doc

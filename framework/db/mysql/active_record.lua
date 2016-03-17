@@ -44,7 +44,6 @@ local function recursive_index(table, key, base_table)
             if type(value) == "function" then
                 local res = value(base_table)
                 if res.is_query then
-                    -- relation
                     return get_relation(res, key, base_table)
                 else
                     return res
@@ -236,6 +235,7 @@ function ActiveRecord:belongs_to_many(class, pivot_table, foreign_key, other_key
     query.local_key = local_key
     query.foreign_key = other_local_key
     query.pivot = pivot
+    query.multiple = true
     return query
 end
 

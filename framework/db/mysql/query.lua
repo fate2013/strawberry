@@ -91,8 +91,8 @@ function Query:group_by(column)
 end
 
 --column: {'field', 'asc/desc'}
-function Query:order_by(column)
-    tappend(self.p_order_by, column)
+function Query:order_by(column, type)
+    tappend(self.p_order_by, {column, type})
     return self
 end
 
@@ -135,29 +135,65 @@ local function normalize_relations(self, model)
     return relations
 end
 
-local function filter_by_models(self, primary_models)
+local function filter_by_models(self, foreign_key, local_key, primary_models)
     local keys = {}
     for _, primary_model in ipairs(primary_models) do
-        tappend(keys, primary_model[self.local_key])
+        tappend(keys, primary_model[local_key])
     end
-    self:where_in(self.foreign_key, keys)
+    self:where_in(foreign_key, keys)
 end
 
-local function build_buckets(models, foreign_key)
-    local buckets = {}
-    for _, model in ipairs(models) do
-        local key = model[foreign_key]
-        if not buckets[key] then
-            buckets[key] = {}
+local function build_buckets(self, models, pivot_rows)
+    local map = nil
+    if pivot_rows then
+        map = {}
+        for _, row in pairs(pivot_rows) do
+            local foreign_key = row[self.pivot.foreign_key]
+            local other_key = row[self.pivot.other_key]
+            if not map[other_key] then
+                map[other_key] = {}
+            end
+            tappend(map[other_key], foreign_key)
         end
-        tappend(buckets[key], model)
+    end
+    local buckets = {}
+    if map then
+        for _, model in ipairs(models) do
+            local key = model[self.foreign_key]
+            for _, foreign_key in pairs(map[key]) do
+                if not buckets[foreign_key] then
+                    buckets[foreign_key] = {}
+                end
+                tappend(buckets[foreign_key], model)
+            end
+        end
+    else
+        for _, model in ipairs(models) do
+            local key = model[self.foreign_key]
+            if not buckets[key] then
+                buckets[key] = {}
+            end
+            tappend(buckets[key], model)
+        end
     end
     return buckets
 end
 
+local function find_pivot_rows(self, primary_models)
+    local query = Query:new(self.model_class)
+    query.local_key = self.local_key
+    filter_by_models(query, self.pivot.foreign_key, self.local_key, primary_models)
+    return query:from(self.pivot.table):as_array():all()
+end
+
 local function populate_relation(self, name, primary_models)
-    -- TODO junction table
-    filter_by_models(self, primary_models)
+    local pivot_rows = {}
+    if self.pivot then
+        pivot_rows = find_pivot_rows(self, primary_models)
+        filter_by_models(self, self.foreign_key, self.pivot.other_key, pivot_rows)
+    else
+        filter_by_models(self, self.foreign_key, self.local_key, primary_models)
+    end
     if not self.multiple and #primary_models == 1 then
         local model = self:one()
         local primary_model = primary_models[1]
@@ -173,7 +209,12 @@ local function populate_relation(self, name, primary_models)
         else
             models = self:all()
         end
-        local buckets = build_buckets(models, self.foreign_key)
+        local buckets = {}
+        if self.pivot then
+            buckets = build_buckets(self, models, pivot_rows)
+        else
+            buckets = build_buckets(self, models)
+        end
         for _, primary_model in ipairs(primary_models) do
             local records = buckets[primary_model[self.local_key]]
             if self.p_as_array then
@@ -239,10 +280,7 @@ end
 
 function Query:find_for(key)
     if self.pivot then
-        local pivot_rows = Query:new(self.model_class)
-            :from(self.pivot.table)
-            :where(self.pivot.foreign_key, self.primary_model[self.local_key])
-            :all()
+        local pivot_rows = find_pivot_rows(self, {self.primary_model})
         local keys = {}
         for _, row in ipairs(pivot_rows) do
             tappend(keys, row[self.pivot.other_key])
