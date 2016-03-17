@@ -60,6 +60,7 @@ It's an openresty web framework, contains MVC and ORM
 ####	MVC
 
 *	Define controller
+	-	controller is a bundle of actions which belongs to a fixed type of business
 	-	reference test/controllers/test.lua
 
 *	Define action
@@ -107,6 +108,7 @@ It's an openresty web framework, contains MVC and ORM
 *	all: query all matched rows
 
 *	as_array: return array instead of model instance
+	-	can get 27% performance promotion
 
 #####	Relation
 *	Declare
