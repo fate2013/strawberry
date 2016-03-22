@@ -78,6 +78,11 @@ function Connection:query_all(sql)
     return query(self, sql)
 end
 
+--Deprecated
+function Connection:query(sql)
+    return query(self, sql)
+end
+
 function Connection:execute(sql)
     return query(self, sql)   
 end
