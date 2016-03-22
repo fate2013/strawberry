@@ -121,7 +121,7 @@ end
 
 function TestController:test()
     local client = require("framework.libs.httpclient"):new()
-    local res = client:get("http://127.0.0.1/",'GET','',{},0)
+    local res = client:get("http://127.0.0.1/", '', {}, 0)
 
     return res.body
 end
@@ -263,6 +263,10 @@ function TestController:active_record_belongs_to_many_with()
         roles = roles,
         users = users,
     })   
+end
+
+function TestController:http_model()
+    local user = User:find():with()
 end
 
 return TestController

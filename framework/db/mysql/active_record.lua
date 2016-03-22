@@ -168,6 +168,10 @@ function ActiveRecord:save()
     end
 end
 
+function ActiveRecord:to_array()
+    return self.attributes
+end
+
 -- Relations
 function ActiveRecord:has_one(class, foreign_key)
     local query = class:find()
@@ -237,10 +241,6 @@ function ActiveRecord:belongs_to_many(class, pivot_table, foreign_key, other_key
     query.pivot = pivot
     query.multiple = true
     return query
-end
-
-function ActiveRecord:to_array()
-    return self.attributes
 end
 
 function ActiveRecord:get_relation(name)
