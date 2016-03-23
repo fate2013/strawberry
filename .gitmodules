@@ -1,3 +1,3 @@
-[submodule "framework/strawberry-http-orm"]
+[submodule "framework/api"]
 	path = framework/api
-	url = git@github.com:nicholaskh/strawberry-http-orm.git
+	url = git@github.com:nicholaskh/strawberry-api-orm.git
