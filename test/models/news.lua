@@ -1,9 +1,16 @@
-local ActiveRecord = require "framework.http.active_record"
+local ActiveRecord = require "framework.api.active_record"
 local http_config = require "test.config.http"
 
 local News = {
     domain = http_config.default_domain,
-    list_api = "/news",
+    apis = {
+        list = "/news",
+        detail = "/news/{id}",
+        create = "/news",
+        update = "/news/{id}",
+        delete = "/news/{id}",
+    },
+    primary_key = "id",
 }
 
 News.__index = News

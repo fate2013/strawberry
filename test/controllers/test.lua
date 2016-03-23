@@ -2,6 +2,8 @@ local response = require "framework.response"
 local User = require "test.models.user"
 local Profile = require "test.models.profile"
 local Role = require "test.models.role"
+local News = require "test.models.news"
+local cjson = require("cjson").new()
 
 local function tappend(t, v) t[#t+1] = v end
 
@@ -182,7 +184,7 @@ end
 
 function TestController:active_record_update()
     local user = User:find():one()
-    user.name = 'zhangkh3'
+    user.name = 'zhangkh'
     user.phone = '15652918035'
     user:save()
 
@@ -265,8 +267,29 @@ function TestController:active_record_belongs_to_many_with()
     })   
 end
 
-function TestController:http_model()
-    local user = User:find():with()
+function TestController:http_ar_list()
+    local news = News:find():where("id", 1):as_array():all()
+    return response:new():send_json(news)
+end
+
+function TestController:http_ar_detail()
+    local news = News:find():where("id", 1):one()
+    return response:new():send_json(news:to_array())
+end
+
+function TestController:http_ar_create()
+    local news = News:new()
+    news.title = 'test title'
+    news.content = 'test content'
+    local ret = cjson.decode(news:save())
+    return response:new():send_json(ret)
+end
+
+function TestController:http_ar_update()
+    local news = News:find():where("id", 1):one()
+    news.title = "title1"
+    local ret = cjson.decode(news:save())
+    return response:new():send_json(ret)
 end
 
 return TestController

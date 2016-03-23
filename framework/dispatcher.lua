@@ -134,6 +134,10 @@ function Dispatcher:errResponse(err)
 end
 
 function Dispatcher:raise_error(err)
+    return self.response:error(200, err)
+end
+
+function Dispatcher:raise_error_page(err)
     local error_controller = require(self.controller_prefix .. self.error_controller)
     setmetatable(error_controller, { __index = self.controller })
     self:initView(self.view, self.error_controller, self.error_action)

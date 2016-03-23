@@ -1,3 +1,5 @@
+local function tappend(t, v) t[#t+1] = v end
+
 -- dep
 -- https://github.com/pintsized/lua-resty-http
 local http_handle = require('framework.libs.http').new()
@@ -5,15 +7,14 @@ local http_handle = require('framework.libs.http').new()
 -- perf
 local setmetatable = setmetatable
 
-local HttpClient = {}
+local HttpClient = {
+    http_handle = http_handle
+}
+
+HttpClient.__index = HttpClient
 
 function HttpClient:new()
-	local instance = {
-		http_handle = http_handle,
-		get = self.get
-	}
-	setmetatable(instance, HttpClient)
-	return instance
+	return setmetatable({}, self)
 end
 
 local function request(self, url, method, params, headers, timeout)
@@ -23,23 +24,43 @@ local function request(self, url, method, params, headers, timeout)
 		body = params,
 		headers = headers
     })
-    return res
+    return res.body
 end
 
-function HttpClient:get(url, params, headers, timeout)
+local function build_params(params)
+    local params_arr = {}
+    for k, v in pairs(params) do
+        tappend(params_arr, k .. "=" .. v)
+    end
+    return table.concat(params_arr, "&")
+end
+
+function HttpClient:get(url, headers, timeout)
     return request(self, url, "GET", '', headers, timeout)
 end
 
 function HttpClient:post(url, params, headers, timeout)
-    return request(self, url, "POST", params, headers, timeout)
+    if not headers then
+        headers = {}
+    end
+    if not headers["Content-Type"] then
+        headers["Content-Type"] = "application/x-www-form-urlencoded"
+    end
+    return request(self, url, "POST", build_params(params), headers, timeout)
 end
 
 function HttpClient:put(url, params, headers, timeout)
-    return request(self, url, "PUT", params, headers, timeout)
+    if not headers then
+        headers = {}
+    end
+    if not headers["Content-Type"] then
+        headers["Content-Type"] = "application/x-www-form-urlencoded"
+    end
+    return request(self, url, "PUT", build_params(params), headers, timeout)
 end
 
 function HttpClient:delete(url, params, headers, timeout)
-    return request(self, url, "DELETE", params, headers, timeout)
+    return request(self, url, "DELETE", build_params(params), headers, timeout)
 end
 
 return HttpClient

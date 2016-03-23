@@ -66,7 +66,7 @@ end
 
 function ActiveRecord:new(row, from_db)
     if from_db == nil then from_db = false end
-    if row == nil then row = {} end
+    if not row then row = {} end
     local model = {
         attributes = row,
         is_new = not from_db,
