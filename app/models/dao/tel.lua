@@ -2,7 +2,7 @@ local _M = { _VERSION = '0.1' }
 
 local mt = { __index = _M }
 
-local cjson = require "cjson"
+local cjson = require "cjson.safe"
 
 
 local function dodbquery(dbname,q)

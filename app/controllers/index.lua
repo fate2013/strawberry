@@ -1,4 +1,4 @@
-local cjson = require('cjson').new()
+local cjson = require "cjson.safe"
 
 local IndexController = {}
 

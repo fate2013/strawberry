@@ -1,4 +1,4 @@
-local cjson = require "cjson"
+local cjson = require "cjson.safe"
 
 local Registry = require('framework.registry'):new('sys')
 -- perf

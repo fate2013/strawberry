@@ -3,7 +3,7 @@ local User = require "test.models.user"
 local Profile = require "test.models.profile"
 local Role = require "test.models.role"
 local News = require "test.models.news"
-local cjson = require("cjson").new()
+local cjson = require "cjson.safe"
 
 local function tappend(t, v) t[#t+1] = v end
 
@@ -268,7 +268,7 @@ function TestController:active_record_belongs_to_many_with()
 end
 
 function TestController:http_ar_list()
-    local news = News:find():where("id", 1):as_array():all()
+    local news = News:find():as_array():all()
     return response:new():send_json(news)
 end
 
