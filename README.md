@@ -87,15 +87,15 @@ It's an openresty web framework, contains MVC and ORM
 	-	where_in("name", {"zhangkh", "zcc"})
 	-	where_like("name", "z%")
 	-	where_multi({"or", "name='zhangkh'", {"and", "id=2", "name='zcc'"}})
-		>	where (name='zhangkh' or (id=2 and name='zcc'))
+		-	where (name='zhangkh' or (id=2 and name='zcc'))
 
 *	group by
 	-	eg:group_by("age"):group_by("sex")
-		>	group by age,sex
+		-	group by age,sex
 
 *	order by
 	-	eg:order_by({"age", "desc"}):order_by({"name", "asc"}), default "asc"
-		>	order by age desc, name asc
+		-	order by age desc, name asc
 
 *	limit
 	-	eg:limit(5)
