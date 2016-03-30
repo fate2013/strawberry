@@ -101,4 +101,9 @@ function Response:error(code, msg)
     return cjson.encode({status = code, message = msg, data = {}})
 end
 
+function Response:send_raw(payload)
+    self:setHeader("Content-Type", "application/json; charset=UTF-8")
+    return payload
+end
+
 return Response
