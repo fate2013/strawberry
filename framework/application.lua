@@ -25,8 +25,12 @@ function Application:lpcall( ... )
     if ok then
         return rs_or_error
     else
-        self:raise_syserror(rs_or_error)
+        self:error_response(500, rs_or_error)
     end
+end
+
+function Application:error_response(code, msg)
+    self.dispatcher:errResponse(code, msg)
 end
 
 function Application:buildconf(config)
@@ -34,10 +38,10 @@ function Application:buildconf(config)
         for k,v in pairs(config) do sys_conf[k] = v end
     end
     if sys_conf.name == nil or sys_conf.app.root == nil then
-        self:raise_syserror([[
+        self:error_response(500, [[
             Sys Err: Please set app name and app root in config/application.lua like:
             
-                Appconf.name = 'idevz.org'
+                Appconf.name = 'strawberry'
                 Appconf.app.root='./'
             ]])
     end
@@ -70,15 +74,6 @@ end
 
 function Application:run()
     self:lpcall(self.dispatcher.dispatch, self.dispatcher)
-end
-
-function Application:raise_syserror(err)
-    if type(err) == 'table' then
-        err = Error:new(err.code, err.msg)
-    end
-    ngx.say('<pre />')
-    ngx.say(Utils.sprint_r(err))
-    ngx.eof()
 end
 
 return Application

@@ -1,7 +1,7 @@
 *.swp
 *.swo
 
-# Vanilla
+# Strawberry
 client_body_temp
 fastcgi_temp
 logs

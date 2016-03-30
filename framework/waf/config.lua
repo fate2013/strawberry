@@ -17,9 +17,9 @@ sys_waf_conf.html=[[
 <!DOCTYPE html>
 	<html>
 		<body>
-		<h1>Welcome To Vanilla's World ...</h1>
-		<h5>=== Vanilla is a Web framework Based On OpenResty ... ====</h5>
-		<h4>---- Sourse Code:https://github.com/idevz/vanilla ... ----</h4>
+		<h1>Welcome To Strawberry's World ...</h1>
+		<h5>=== Strawberry is a Web framework Based On OpenResty ... ====</h5>
+		<h4>---- Sourse Code:https://github.com/nicholaskh/strawberry ... ----</h4>
 		</body>
 	</html>
 ]]

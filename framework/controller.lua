@@ -11,7 +11,7 @@ function Controller:new(request, response, app_config)
         params = request.params,
         request = request,
         response = response,
-        view = {}
+        view = nil
     }
     setmetatable(instance, {__index = self})
     return instance
@@ -39,7 +39,7 @@ function Controller:initView(view_handle, controller_name, action_name)
     if view_handle ~= nil then self.view = view_handle end
     if controller_name ~= nil then init_controller = controller_name else init_controller = self.request.controller_name end
     if action_name ~= nil then init_action = action_name else init_action = self.request.action_name  end
-    self.view:init(init_controller, init_action)
+    if self.view then self.view:init(init_controller, init_action) end
 end
 
 function Controller:redirect(url)

@@ -8,7 +8,6 @@ local Error = require 'framework.error'
 -- perf
 local error = error
 local pairs = pairs
-local pcall = pcall
 local require = require
 local setmetatable = setmetatable
 local function tappend(t, v) t[#t+1] = v end
@@ -67,13 +66,10 @@ function Dispatcher:getRouter()
 end
 
 function Dispatcher:_route()
-    local ok, controller_name_or_error, action= pcall(run_route, self.router)
-    if ok and controller_name_or_error then
+    local controller_name_or_error, action= run_route(self.router)
+    if controller_name_or_error then
         self.request.controller_name = controller_name_or_error
         self.request.action_name = action
-        return true
-    else
-        self:errResponse(controller_name_or_error)
     end
 end
 
@@ -83,13 +79,13 @@ end
 
 local function call_controller(Dispatcher, matched_controller, controller_name, action_name)
     if matched_controller[action_name] == nil then
-        Dispatcher:errResponse({ code = 102, msg = {NoAction = action_name}})
+        Dispatcher:errResponse(102, {NoAction = action_name})
     end
     Dispatcher:initView()
     local body = matched_controller[action_name](matched_controller)
     if body ~= nil then return body
     else
-        Dispatcher:errResponse({ code = 104, msg = {Exec_Err = controller_name .. '/' .. action_name}})
+        Dispatcher:errResponse(104, {Exec_Err = controller_name .. '/' .. action_name})
     end
 end
 
@@ -98,14 +94,16 @@ function Dispatcher:dispatch()
     self:_route()
     self:_runPlugins('routerShutdown')
     self.controller = Controller:new(self.request, self.response, self.application.config)
-    self.view = self.application:lpcall(new_view, self.application.config.view)
+    if self.application.config.view then
+        self.view = pcall(new_view(self.application.config.view))
+    end
     self:_runPlugins('dispatchLoopStartup')
     self:_runPlugins('preDispatch')
-    local matched_controller = self:lpcall(require_controller, self.controller_prefix, self.request.controller_name)
+    local matched_controller = require_controller(self.controller_prefix, self.request.controller_name)
     setmetatable(matched_controller, { __index = self.controller })
-    local c_rs = self:lpcall(call_controller, self, matched_controller, self.request.controller_name, self.request.action_name)
+    local c_rs = call_controller(self, matched_controller, self.request.controller_name, self.request.action_name)
     if type(c_rs) ~= 'string' then
-        self:errResponse({ code = 103, msg = {Rs_Error = self.request.controller_name .. '/' .. self.request.action_name .. ' must return a String.'}})
+        self:errResponse(103, {Rs_Error = self.request.controller_name .. '/' .. self.request.action_name .. ' must return a String.'})
     end
     self.response.body = c_rs
     self:_runPlugins('postDispatch')
@@ -118,36 +116,10 @@ function Dispatcher:initView(view, controller_name, action_name)
     self.controller:initView(self.view, controller_name, action_name)
 end
 
-function Dispatcher:lpcall( ... )
-    local ok, rs_or_error = pcall( ... )
-    if ok then
-        return rs_or_error
-    else
-        self:errResponse(rs_or_error)
-    end
-end
-
-function Dispatcher:errResponse(err)
-    self.response.body = self:raise_error(err)
+function Dispatcher:errResponse(code, msg)
+    self.response.body = self.response:error(code, msg)
     self.response:response()
     ngx.eof()
-end
-
-function Dispatcher:raise_error(err)
-    return self.response:error(200, err)
-end
-
-function Dispatcher:raise_error_page(err)
-    local error_controller = require(self.controller_prefix .. self.error_controller)
-    setmetatable(error_controller, { __index = self.controller })
-    self:initView(self.view, self.error_controller, self.error_action)
-    local error_instance = Error:new(err.code, err.msg)
-    if error_instance ~= false then
-        error_controller.err = error_instance
-    else
-        error_controller.err = Error:new(100, {msg = err})
-    end
-    return error_controller[self.error_action](error_controller)
 end
 
 function Dispatcher:getApplication()

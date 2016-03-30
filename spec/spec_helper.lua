@@ -1,1 +1,1 @@
-require 'vanilla.spec.runner'
+require 'strawberry.spec.runner'

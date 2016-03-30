@@ -117,7 +117,7 @@ end
 local function say_html()
     if Redirect then
         ngx.header.content_type = "text/html"
-        ngx.header.Power_by = "Vanilla-idevz/vanilla"
+        ngx.header.Power_by = "Strawberry-nicholaskh/strawberry"
         ngx.status = ngx.HTTP_FORBIDDEN
         ngx.say(waf_conf.html)
         ngx.eof()
