@@ -123,9 +123,9 @@ end
 
 function TestController:test()
     local client = require("framework.libs.httpclient"):new()
-    local res = client:get("http://127.0.0.1/", '', {}, 0)
+    local res = client:get("http://127.0.0.1/", {}, 0)
 
-    return res.body
+    return res
 end
 
 function TestController:redismget()
