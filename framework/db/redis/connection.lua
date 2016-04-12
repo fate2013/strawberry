@@ -1,4 +1,3 @@
---Deprecated
 local redis = require "resty.redis"
 
 local function tappend(t, v) t[#t+1] = v end
@@ -85,7 +84,7 @@ function Connection:pipeline(cmds)
     end
     conn:init_pipeline()
     for _, cmd in ipairs(cmds) do
-        conn[cmd[1]](conn, tsub(cmd, 2))
+        conn[cmd[1]](conn, unpack(tsub(cmd, 2)))
     end
 
     local results, err = conn:commit_pipeline()

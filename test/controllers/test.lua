@@ -45,6 +45,13 @@ function TestController:redisclient()
     return response:new():send_json(res)
 end
 
+function TestController:redispipeline()
+    local Connection = require "framework.db.redis.connection"
+    local connection = Connection:new("127.0.0.1", 6379, 1000)
+    local res = cjson.encode(connection:pipeline({{"set", "aa", 5}, {"incr", "aa"}}))
+    return res
+end
+
 local function _random_string(length)
     local res = ""
     for i = 1, length do
