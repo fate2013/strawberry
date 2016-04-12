@@ -1,3 +1,6 @@
 [submodule "framework/api"]
 	path = framework/api
 	url = git@github.com:nicholaskh/strawberry-api-orm.git
+[submodule "framework/concurrent"]
+	path = framework/concurrent
+	url = git@github.com:nicholaskh/strawberry-concurrent.git

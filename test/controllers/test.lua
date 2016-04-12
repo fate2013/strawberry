@@ -292,4 +292,19 @@ function TestController:http_ar_update()
     return response:new():send_json(ret)
 end
 
+function TestController:countdownlatch()
+    local Connection = require "framework.db.redis.connection"
+    local connection = Connection:new("127.0.0.1", 6379, 1000)
+    local CountdownLatch = require "framework.concurrent.countdownlatch.countdownlatch"
+    local countdownlatch = CountdownLatch:new("test", 5, "redis", connection)
+    local ret
+    for i = 1, 5 do
+        ret = countdownlatch:countdown()
+    end
+    countdownlatch:countdown()
+    ret = countdownlatch:countdown()
+
+    return string.format("%s", ret)
+end
+
 return TestController

@@ -1,13 +1,25 @@
 --Deprecated
 local redis = require "resty.redis"
 
-local Client = {}
-Client.__index = Client
-Client.__tostring = function(self)
+local function tappend(t, v) t[#t+1] = v end
+
+local function tsub(t, first, last)
+    local tb = {}
+    if not last then last = #t end
+    for i = first, last do
+        local ele = t[i]
+        tappend(tb, ele)
+    end
+    return tb
+end
+
+local Connection = {}
+Connection.__index = Connection
+Connection.__tostring = function(self)
     return self.host .. ":" .. self.port .. ":" .. self.conn_timeout
 end
 
-function Client:new(host, port, conn_timeout, pool_size, keepalive_time, pwd)
+function Connection:new(host, port, conn_timeout, pool_size, keepalive_time, pwd)
     if not host then host = "127.0.0.1" end
     if not port then port = 6379 end
     if not conn_timeout then conn_timeout = 0 end
@@ -21,7 +33,7 @@ function Client:new(host, port, conn_timeout, pool_size, keepalive_time, pwd)
         pool_size = pool_size,
         keepalive_time = keepalive_time,
         pwd = pwd,
-    }, Client)
+    }, Connection)
 end
 
 local function connect(host, port, conn_timeout)
@@ -45,7 +57,7 @@ local function keepalive(conn, pool_size, keepalive_time)
     end
 end
 
-function Client:query(cmd, ...)
+function Connection:query(cmd, ...)
     local conn = connect(self.host, self.port, self.conn_timeout)
     if not conn then
         return
@@ -62,4 +74,28 @@ function Client:query(cmd, ...)
     return res
 end
 
-return Client
+function Connection:pipeline(cmds)
+    local conn = connect(self.host, self.port, self.conn_timeout)
+    if not conn then
+        return
+    end
+
+    if self.pwd then
+        conn:auth(self.pwd)
+    end
+    conn:init_pipeline()
+    for _, cmd in ipairs(cmds) do
+        conn[cmd[1]](conn, tsub(cmd, 2))
+    end
+
+    local results, err = conn:commit_pipeline()
+
+    if not results or results == ngx.null then
+        return
+    end
+    keepalive(conn, self.pool_size, self.keepalive_time)
+
+    return results
+end
+
+return Connection
