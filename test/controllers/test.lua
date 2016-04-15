@@ -314,4 +314,15 @@ function TestController:countdownlatch()
     return string.format("%s", ret)
 end
 
+function TestController:queue()
+    local Connection = require "framework.db.redis.connection"
+    local connection = Connection:new("127.0.0.1", 6379, 1000)
+    local Queue = require "framework.queue.queue"
+    local queue = Queue:new("test_queue", "redis", connection)
+    queue:push("aaa")
+    local ele = queue:pop()
+
+    return ele
+end
+
 return TestController
