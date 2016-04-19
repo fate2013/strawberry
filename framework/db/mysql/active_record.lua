@@ -29,10 +29,6 @@ local function recursive_index(table, key, base_table)
     if value then
         return value
     end
-    value = rawget(table, key)
-    if value then
-        return value
-    end
     local index = rawget(table, "__index")
     if index == table then
         return nil
