@@ -1,10 +1,12 @@
+local Registry = require("framework.registry"):new("sys")
+
 local Queue = {}
 
 Queue.__index = Queue
 
-function Queue:new(name, driver_type, connection)
+function Queue:new(name, connection)
     local DriverFactory = require "framework.queue.driver_factory"
-    local driver = DriverFactory:factory(driver_type, connection, name)
+    local driver = DriverFactory:factory(Registry.app.config.queue.driver_type, connection, name)
     return setmetatable({
         name = name,
         driver = driver,
