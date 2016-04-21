@@ -5,9 +5,10 @@ local setmetatable = setmetatable
 
 local Controller = {}
 
-function Controller:new(request, response, app_config)
+function Controller:new(request, response, app)
     local instance = {
-        app_config = app_config,
+        app = app,
+        app_config = app.config,
         params = request.params,
         request = request,
         response = response,

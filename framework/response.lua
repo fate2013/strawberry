@@ -8,9 +8,8 @@ local Response = {}
 Response.__index = Response
 
 function Response:new()
-    local app_version = Registry['app_version']
     ngx.header['Content_type'] = 'text/html; charset=UTF-8'
-    ngx.header['Power_By'] = 'Strawberry-' .. app_version
+    ngx.header['Power_By'] = 'Strawberry-' .. Registry.app.config.version
     local instance = {
         status = 200,
         headers = {},
@@ -96,7 +95,7 @@ end
 
 function Response:error(code, msg)
     if not code then code = 500 end
-    if not msg then msg = "服务器错误" end
+    if not msg or  not Registry.app.config.debug and code == 500 then msg = "服务器错误" end
     self:setHeader("Content-Type", "application/json; charset=UTF-8")
     return cjson.encode({status = code, message = msg, data = {}})
 end

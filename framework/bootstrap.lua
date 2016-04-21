@@ -1,3 +1,5 @@
+local io = require "io"
+
 -- perf
 local pairs = pairs
 local setmetatable = setmetatable

@@ -18,7 +18,7 @@ end
 
 function TestController:mysqlreplica_master()
     local mysql_replica = require "framework.db.mysql.replica"
-    local config = require "test.config.mysql"
+    local config = self.app:get("config"):get("mysql")
     local replica = mysql_replica:instance("activity", config.activity)
     if not replica then
         return "invalid mysql db specified"
@@ -130,7 +130,7 @@ end
 
 function TestController:test()
     local client = require("framework.libs.httpclient"):new()
-    local res = client:get("http://127.0.0.1/", {}, 0)
+    local res = client:get("http://127.0.0.1/", {a="b", b="c"})
 
     return res
 end

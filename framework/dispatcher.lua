@@ -29,7 +29,7 @@ function Dispatcher:new(application)
     local instance = {
         application = application,
         plugins = {},
-        controller_prefix = application.config.controller.prefix,
+        controller_prefix = application.config.module_name .. ".controllers.",
         error_controller = 'error',
         error_action = 'error'
     }
@@ -93,7 +93,7 @@ function Dispatcher:dispatch()
     self:_runPlugins('routerStartup')
     self:_route()
     self:_runPlugins('routerShutdown')
-    self.controller = Controller:new(self.request, self.response, self.application.config)
+    self.controller = Controller:new(self.request, self.response, self.application)
     if self.application.config.view then
         self.view = pcall(new_view(self.application.config.view))
     end

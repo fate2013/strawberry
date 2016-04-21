@@ -4,7 +4,6 @@ local mysql_config = require "test.config.mysql"
 local Profile = {
     table_name = "profile",
     config_group = "default",
-    config = mysql_config["default"],
 }
 Profile.__index = Profile
 

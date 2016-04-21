@@ -1,6 +1,7 @@
 local Query = require "framework.db.mysql.query"
 local Schema = require "framework.db.mysql.schema"
 local Replica = require "framework.db.mysql.replica"
+local Registry = require("framework.registry"):new("sys")
 
 local function tappend(t, v) t[#t+1] = v end
 
@@ -8,7 +9,6 @@ local ActiveRecord = {
     table_name = "",
     primary_key = "id",
     config_group = "default",
-    config = {},
     table_schema = nil,
     replica = nil,
 }
@@ -94,7 +94,7 @@ function ActiveRecord:get_replica()
     if replica then
         return replica
     end
-    replica = Replica:instance(self.config_group, self.config)
+    replica = Replica:instance(self.config_group, Registry.app.config.mysql[self.config_group])
     rawset(self, "replica", replica)
     return replica
 end

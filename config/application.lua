@@ -1,17 +1,13 @@
-local Appconf = {}
-Appconf.name = 'framework'
+return {
+    debug = true,
+    module_name = 'app',
+    route = 'framework.routes.simple',
+    base_dir = ngx.var.root .. '/',
+    version = '1.0.0',
 
-Appconf.route = 'framework.routes.simple'
-Appconf.bootstrap = 'app.bootstrap'
-Appconf.app = {}
-Appconf.app.root = ngx.var.root .. '/'
-
-Appconf.controller = {}
-Appconf.controller.prefix = 'app.controllers.'
-
-Appconf.view = {}
-Appconf.view.path = Appconf.app.root .. 'app/views/'
-Appconf.view.suffix = '.html'
-Appconf.view.auto_render = true
-
-return Appconf
+    view = {
+        path = Appconf.app.root .. 'app/views/',
+        suffix = '.html',
+        auto_render = true,
+    },
+}

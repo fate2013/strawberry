@@ -1,8 +1,9 @@
+require "framework.functions"
 local Error = require 'framework.error'
-local sys_conf = require 'framework.config'
 local Dispatcher = require 'framework.dispatcher'
 local Registry = require('framework.registry'):new('sys')
 local Utils = require 'framework.libs.utils'
+local ServiceLocator = require "framework.di.service_locator"
 
 -- perf
 local pairs = pairs
@@ -20,6 +21,10 @@ end
 
 local Application = {}
 
+setmetatable(Application, {
+    __index = ServiceLocator,
+})
+
 function Application:lpcall( ... )
     local ok, rs_or_error = pcall( ... )
     if ok then
@@ -33,40 +38,33 @@ function Application:error_response(code, msg)
     self.dispatcher:errResponse(code, msg)
 end
 
-function Application:buildconf(config)
-    if config ~= nil then
-        for k,v in pairs(config) do sys_conf[k] = v end
+local function load_app_config(self)
+    local config = require_dir(self.config.module_name .. ".config")
+    for k, v in pairs(config) do
+        self.config[k] = v
     end
-    if sys_conf.name == nil or sys_conf.app.root == nil then
-        self:error_response(500, [[
-            Sys Err: Please set app name and app root in config/application.lua like:
-            
-                Appconf.name = 'strawberry'
-                Appconf.app.root='./'
-            ]])
-    end
-    Registry['app_name'] = sys_conf.name
-    Registry['app_root'] = sys_conf.app.root
-    Registry['app_version'] = sys_conf.version
-    return sys_conf
+end
+
+local function buildconf(self, config)
+    self.config = config
+    Registry.app = self
+    load_app_config(self)
 end
 
 function Application:new(config)
-    self.config = self:buildconf(config)
+    buildconf(self, config)
     local instance = {
         run = self.run,
         bootstrap = self.bootstrap,
-        dispatcher = self:lpcall(new_dispatcher, self)
+        --dispatcher = self:lpcall(new_dispatcher, self)
+        dispatcher = new_dispatcher(self)
     }
-    setmetatable(instance, {__index = self})
+    setmetatable(instance, {__index = Application})
     return instance
 end
 
 function Application:bootstrap()
-    local lbootstrap = 'app.bootstrap'
-    if self.config['bootstrap'] ~= nil then
-        lbootstrap = self.config['bootstrap']
-    end
+    local lbootstrap = self.config.module_name .. '.bootstrap'
     bootstrap_instance = self:lpcall(new_bootstrap_instance, lbootstrap, self.dispatcher)
     self:lpcall(bootstrap_instance.bootstrap, bootstrap_instance)
     return self

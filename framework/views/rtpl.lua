@@ -7,12 +7,11 @@ local Registry = require('framework.registry'):new('sys')
 local error = error
 local pairs = pairs
 local setmetatable = setmetatable
-local app_root = Registry['app_root']
 
 local View = {}
 
 function View:new(view_config)
-    ngx.var.template_root = view_config.path or app_root .. 'app/views/'
+    ngx.var.template_root = view_config.path or Registry.app.config.app_root .. 'app/views/'
     local instance = {
         view_config = view_config,
         init = self.init
