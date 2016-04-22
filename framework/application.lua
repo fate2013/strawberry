@@ -21,6 +21,8 @@ end
 
 local Application = {}
 
+local application = nil
+
 setmetatable(Application, {
     __index = ServiceLocator,
 })
@@ -47,20 +49,37 @@ end
 
 local function buildconf(self, config)
     self.config = config
-    Registry.app = self
     load_app_config(self)
 end
 
+local function register_components(self)
+    if self.config.app.components then
+        for id, definition in pairs(self.config.app.components) do
+            if definition["singleton"] then
+                local Class = require(definition['class'])
+                definition['class'] = nil
+                definition['singleton'] = nil
+                self:instance(id, Class:new(definition))
+            else
+                definition['singleton'] = nil
+                self:register(id, definition)
+            end
+        end
+    end
+end
+
 function Application:new(config)
-    buildconf(self, config)
-    local instance = {
-        run = self.run,
-        bootstrap = self.bootstrap,
-        --dispatcher = self:lpcall(new_dispatcher, self)
-        dispatcher = new_dispatcher(self)
-    }
-    setmetatable(instance, {__index = Application})
-    return instance
+    if not application then
+        buildconf(self, config)
+        local instance = ServiceLocator:new()
+        setmetatable(instance, {__index = Application})
+
+        register_components(instance)
+        application = instance
+        Registry.app = application
+        instance.dispatcher = self:lpcall(new_dispatcher, self)
+    end
+    return application
 end
 
 function Application:bootstrap()

@@ -23,9 +23,8 @@ end
 local Dispatcher = {}
 
 function Dispatcher:new(application)
-    self.request = Request:new()
     self.response = Response:new()
-    self.router = Router:new(self.request)
+    self.router = Router:new()
     local instance = {
         application = application,
         plugins = {},
@@ -37,12 +36,13 @@ function Dispatcher:new(application)
     return instance
 end
 
-function Dispatcher:getRequest()
+function Dispatcher:get_request()
     return self.request
 end
 
-function Dispatcher:setRequest(request)
+function Dispatcher:set_request(request)
     self.request = request
+    self.router:set_request(request)
 end
 
 function Dispatcher:getResponse()
@@ -90,6 +90,7 @@ local function call_controller(Dispatcher, matched_controller, controller_name, 
 end
 
 function Dispatcher:dispatch()
+    self:set_request(Request:new())
     self:_runPlugins('routerStartup')
     self:_route()
     self:_runPlugins('routerShutdown')

@@ -4,6 +4,7 @@ local Profile = require "test.models.profile"
 local Role = require "test.models.role"
 local News = require "test.models.news"
 local cjson = require "cjson.safe"
+local Registry = require("framework.registry"):new("sys")
 
 local function tappend(t, v) t[#t+1] = v end
 
@@ -300,10 +301,7 @@ function TestController:http_ar_update()
 end
 
 function TestController:countdownlatch()
-    local Connection = require "framework.db.redis.connection"
-    local connection = Connection:new("127.0.0.1", 6379, 1000)
-    local CountdownLatch = require "framework.concurrent.countdownlatch.countdownlatch"
-    local countdownlatch = CountdownLatch:new("test", 5, "redis", connection)
+    local countdownlatch = Registry.app:get("countdownlatch")
     local ret
     for i = 1, 5 do
         ret = countdownlatch:countdown()
@@ -311,14 +309,11 @@ function TestController:countdownlatch()
     countdownlatch:countdown()
     ret = countdownlatch:countdown()
 
-    return string.format("%s", ret)
+    return response:new():send_json(string.format("%s", ret))
 end
 
 function TestController:queue()
-    local Connection = require "framework.db.redis.connection"
-    local connection = Connection:new("127.0.0.1", 6379, 1000)
-    local Queue = require "framework.queue.queue"
-    local queue = Queue:new("test_queue", connection)
+    local queue = Registry.app:get("queue")
     queue:push("aaa")
     local ele = queue:pop()
 

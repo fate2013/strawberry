@@ -14,14 +14,20 @@ local CACHE_CAPACITY = 1000
 -- maybe overflow
 local cache = lrucache.new(CACHE_CAPACITY)
 
-function Router:new(request)
+function Router:new()
     local instance = {
-        routes = {require('framework.routes.simple'):new(request)},
-    	request = request,
+        routes = {require('framework.routes.simple'):new()},
     }
 
     setmetatable(instance, {__index = self})
     return instance
+end
+
+function Router:set_request(request)
+    self.request = request
+    for _, route in ipairs(self.routes) do
+        route:set_request(request)
+    end
 end
 
 function Router:addRoute(route, only_one)

@@ -43,7 +43,6 @@ function HttpClient:get(url, params, headers, timeout_ms)
             url = url .. "?"
         end
         url = url .. build_params(params)
-        print_r(url)
     end
     return request(self, url, "GET", '', headers, timeout_ms)
 end

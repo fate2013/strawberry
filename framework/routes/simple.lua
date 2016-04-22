@@ -5,10 +5,9 @@ local ngxmatch=ngx.re.gmatch
 -- init Simple and set routes
 local Simple = {}
 
-function Simple:new(request)
+function Simple:new()
     local instance = {
         route_name = 'framework.routes.simple',
-    	request = request
     }
 
     setmetatable(instance, {
@@ -16,6 +15,10 @@ function Simple:new(request)
         __tostring = function(self) return self.route_name end
         })
     return instance
+end
+
+function Simple:set_request(request)
+    self.request = request
 end
 
 function Simple:match()

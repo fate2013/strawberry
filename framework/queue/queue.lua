@@ -4,11 +4,11 @@ local Queue = {}
 
 Queue.__index = Queue
 
-function Queue:new(name, connection)
+function Queue:new(params)
     local DriverFactory = require "framework.queue.driver_factory"
-    local driver = DriverFactory:factory(Registry.app.config.queue.driver_type, connection, name)
+    local driver = DriverFactory:factory(params['driver'], params['connection'], params['name'])
     return setmetatable({
-        name = name,
+        name = params['name'],
         driver = driver,
     }, Queue)
 end
