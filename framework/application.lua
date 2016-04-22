@@ -4,6 +4,7 @@ local Dispatcher = require 'framework.dispatcher'
 local Registry = require('framework.registry'):new('sys')
 local Utils = require 'framework.libs.utils'
 local ServiceLocator = require "framework.di.service_locator"
+local cjson = require "cjson.safe"
 
 -- perf
 local pairs = pairs
@@ -21,7 +22,7 @@ end
 
 local Application = {}
 
-local application = nil
+local applications = {}
 
 setmetatable(Application, {
     __index = ServiceLocator,
@@ -44,6 +45,10 @@ local function load_app_config(self)
     local config = require_dir(self.config.module_name .. ".config")
     for k, v in pairs(config) do
         self.config[k] = v
+    end
+    if not self.config['app'] then
+        ngx.say(cjson.encode({status = 500, message = 'App config not specified'}))
+        ngx.eof()
     end
 end
 
@@ -69,17 +74,20 @@ local function register_components(self)
 end
 
 function Application:new(config)
-    if not application then
-        buildconf(self, config)
+    if not applications[config["module_name"]] then
         local instance = ServiceLocator:new()
         setmetatable(instance, {__index = Application})
 
+        buildconf(instance, config)
         register_components(instance)
-        application = instance
-        Registry.app = application
-        instance.dispatcher = self:lpcall(new_dispatcher, self)
+        applications[config["module_name"]] = instance
+        Registry.app = applications[config["module_name"]]
+        --instance.dispatcher = self:lpcall(new_dispatcher, instance)
+        instance.dispatcher = new_dispatcher(instance)
+    else
+        Registry.app = applications[config["module_name"]]
     end
-    return application
+    return applications[config["module_name"]]
 end
 
 function Application:bootstrap()
