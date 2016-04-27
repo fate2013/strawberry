@@ -2,19 +2,19 @@ local function tappend(t, v) t[#t+1] = v end
 
 -- dep
 -- https://github.com/pintsized/lua-resty-http
-local http_handle = require('framework.libs.http').new()
+local http = require('framework.libs.http')
 
 -- perf
 local setmetatable = setmetatable
 
-local HttpClient = {
-    http_handle = http_handle
-}
+local HttpClient = {}
 
 HttpClient.__index = HttpClient
 
 function HttpClient:new()
-	return setmetatable({}, self)
+	return setmetatable({
+        http_handle = http:new(),
+    }, self)
 end
 
 local function request(self, url, method, params, headers, timeout_ms)
