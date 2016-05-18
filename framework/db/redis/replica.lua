@@ -31,7 +31,7 @@ function Replica:master()
 end
 
 function Replica:slave()
-    math.randomseed(os.time())
+    math.randomseed(os.clock())
     return self.slaves[math.random(#self.slaves)]
 end
 

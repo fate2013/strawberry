@@ -5,6 +5,7 @@ local Role = require "test.models.role"
 local News = require "test.models.news"
 local cjson = require "cjson.safe"
 local Registry = require("framework.registry"):new("sys")
+local qconf = require "framework.libs.qconf"
 
 local function tappend(t, v) t[#t+1] = v end
 
@@ -156,6 +157,7 @@ function TestController:redisreplica_slave()
     local config = require "test.config.redis"
     local replica = redis_replica:instance("activity", config.replica.activity)
     local res = replica:slave():query("mget", "dog", "aaaa")
+    local res = replica:slave():pipeline({{"get", "aa"}, {"get", "bb"}})
     return response:new():send_json(res)
 end
 
@@ -318,6 +320,11 @@ function TestController:queue()
     local ele = queue:pop()
 
     return response:new():send_json(ele)
+end
+
+function TestController:qconf()
+    local err, ret = qconf.get_conf("/bp/member")
+    return ret
 end
 
 return TestController
