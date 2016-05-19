@@ -327,4 +327,30 @@ function TestController:qconf()
     return ret
 end
 
+local function get_rate_limit_key(seconds)
+    return "rate_limit" .. seconds
+end
+
+function TestController:rate_limit()
+    local qconf = require "framework.libs.qconf"
+    local err, ret = qconf.get_batch_conf("/activity/shake/rate_limit")
+    if err ~= 0 then
+        return response:new():error(500, "Get Config error")
+    end
+    for seconds, rate in pairs(ret) do
+        local key = get_rate_limit_key(seconds)
+        local sharedict = ngx.shared.cache
+        local cur_rate = sharedict:get(key)
+        if not cur_rate then
+            cur_rate = 0
+        end
+        cur_rate = cur_rate + 1
+        sharedict:set(key, cur_rate, seconds)
+        if cur_rate >= tonumber(rate) then
+            return response:new():error(403, "Request too frequently: " .. cur_rate .. "/" .. rate)
+        end
+    end
+    return response:new():success()
+end
+
 return TestController
