@@ -5,7 +5,6 @@ local Role = require "test.models.role"
 local News = require "test.models.news"
 local cjson = require "cjson.safe"
 local Registry = require("framework.registry"):new("sys")
-local qconf = require "framework.libs.qconf"
 
 local function tappend(t, v) t[#t+1] = v end
 
@@ -323,6 +322,7 @@ function TestController:queue()
 end
 
 function TestController:qconf()
+    local qconf = require "framework.libs.qconf"
     local err, ret = qconf.get_conf("/bp/member")
     return ret
 end
