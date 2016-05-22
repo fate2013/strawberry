@@ -86,6 +86,30 @@ function TestController:flexihash()
     return response:new():send_json(freq)
 end
 
+function TestController:flexihash_lookup()
+    local util_flexihash = require "framework.libs.flexihash"
+    local flexihash = util_flexihash:instance()
+    local targets = {
+        "127.0.0.1:6379",
+        "127.0.0.1:6380",
+        "127.0.0.1:6381",
+    }
+    local freq = {}
+    for k, target in pairs(targets) do
+        flexihash:add_target(target)
+    end
+
+    local targets = {}
+    for i = 1, 10 do
+        local str = 'test_key_' .. i
+        --local target = flexihash:lookup_list(str, 1)[1]
+        local target = flexihash:lookup(str)
+        table.insert(targets, str .. ":" .. target)
+    end
+
+    return response:new():send_json(targets)
+end
+
 function TestController:crc32()
     local CRC = require "framework.libs.hasher.crc32"
     return tostring(CRC.crc32('aa'))
