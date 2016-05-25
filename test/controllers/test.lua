@@ -377,4 +377,9 @@ function TestController:rate_limit()
     return response:new():success()
 end
 
+function TestController:alarm()
+    local alarm = require("framework/log/alarm"):new()
+    alarm:write("test", 1000000000, 3, "test message")
+end
+
 return TestController
