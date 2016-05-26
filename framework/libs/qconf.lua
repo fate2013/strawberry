@@ -5,6 +5,13 @@
 --
 --]]
 
+local function tempty(table)
+    for i, v in pairs(table) do
+        return false
+    end
+    return true
+end
+
 local ffi = require('ffi')
 -- local qconf = ffi.load("/absolute/libqconf.so")
 local qconf = ffi.load("/usr/local/qconf/lib/libqconf.so")
@@ -199,11 +206,38 @@ local function version()
     return 0, qconf_version
 end
 
+local function get_conf_recursive(key, idc)
+    local nodes = {}
+    local ret, keys = get_batch_keys(key)
+    if ret ~= 0 then
+        return ret, qconf_errors[tostring(ret)]
+    end
+    if type(keys) == "table" and not tempty(keys) then
+        for _, node in pairs(keys) do
+            local path = key .. "/" .. node
+            local ret, value = get_conf(path, idc)
+            if ret ~= 0 then
+                return ret, qconf_errors[tostring(ret)]
+            end
+            if value ~= "" then
+                nodes[node] = value
+            else
+                ret, nodes[node] = get_conf_recursive(path, idc)
+                if ret ~= 0 then
+                    return ret, qconf_errors[tostring(ret)]
+                end
+            end
+        end
+    end
+    return ret, nodes
+end
+
 return {
     get_conf = get_conf,
     get_allhost = get_allhost,
     get_host = get_host,
     get_batch_conf = get_batch_conf,
     get_batch_keys = get_batch_keys,
-    version = version
+    version = version,
+    get_conf_recursive = get_conf_recursive,
 }

@@ -382,4 +382,17 @@ function TestController:alarm()
     alarm:write("test", 1000000000, 3, "test message")
 end
 
+function TestController:rediscluster_switch_config()
+    local qconf = require "framework.libs.qconf"
+    local err, config = qconf.get_conf_recursive("/activity/shake/redis")
+    print_r(config)
+    local redis_cluster = require "framework.db.redis.cluster"
+    local cluster = redis_cluster:instance("activity", config)
+    if cluster then
+        return response:new():send_json(cluster:query("get", "dog"))
+    else
+        return "invalid redis cluster specified"
+    end
+end
+
 return TestController
