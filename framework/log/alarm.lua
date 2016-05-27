@@ -29,7 +29,7 @@ local function write_to_text(self, flags)
     if not file then
         os.execute("mkdir " .. self.path)
     end
-    log = cjson.encode(self.log_formater) .. "\n"
+    local log = cjson.encode(self.log_formater) .. "\n"
     local file = io.open(self.path .. flags .. ".log","a")
     file:write(log)
     file:close()
@@ -61,8 +61,8 @@ function Alarm:write(flags, code, level, message)
     local file = ""
     local line = ""
     local traceback_arr = string.split(debug.traceback(), "\n\9")
-    if #traceback_arr >= 2 then
-        local first_line_arr = string.split(traceback_arr[2], ":")
+    if #traceback_arr >= 3 then
+        local first_line_arr = string.split(traceback_arr[3], ":")
         file = first_line_arr[1]
         line = first_line_arr[2]
     end

@@ -1,5 +1,9 @@
 --Deprecated
 local redis = require "resty.redis"
+local Alarm = require "framework.log.alarm"
+
+local ERR_CODE_REDIS_CONN = 1000000000
+local ERR_CODE_REDIS_QUERY = 1000000001
 
 local Client = {}
 Client.__index = Client
@@ -31,6 +35,7 @@ local function connect(host, port, conn_timeout)
 
     local ok, err = conn:connect(host, port)
     if not ok then
+        Alarm:new():write("redis", ERR_CODE_REDIS_CONN, ngx.ERR, "connect error, host:" .. host .. ", port:" .. port .. ", timeout:" .. conn_timeout .. ",error:" .. err)
         ngx.log(ngx.ERR, "failed to connect: ", err)
         return
     end
@@ -54,6 +59,9 @@ function Client:query(cmd, ...)
         conn:auth(self.pwd)
     end
     local res, err = conn[cmd](conn, ...)
+    if err then
+        Alarm:new():write("redis", ERR_CODE_REDIS_QUERY, ngx.ERR, "query error, host:" .. self.host .. ", port:" .. self.port .. ", timeout:" .. self.conn_timeout .. ",error:" .. err)
+    end
     if not res or res == ngx.null then
         return
     end
