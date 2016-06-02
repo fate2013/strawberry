@@ -1,7 +1,5 @@
 -- TODO more hash alg
 -- TODO refactor with ffi
-local CRC = require "framework.libs.hasher.crc32"
-
 local Flexihash = {}
 
 Flexihash.__index = Flexihash
@@ -39,7 +37,7 @@ function Flexihash:add_target(target, weight)
 
     -- hash the target into multiple positions
     for i = 1, math.floor(self._replicas * weight) do
-        position = CRC.crc32(target .. i)
+        position = ngx.crc32_long(target .. i)
         table.insert(self._position_target_pairs, {position, target}) -- lookup
         table.insert(self._target2indexes[target], #self._position_target_pairs) -- target removal
     end
@@ -94,7 +92,7 @@ function Flexihash:lookup(resource)
             return target
         end
     end
-    local resource_position = CRC.crc32(resource)
+    local resource_position = ngx.crc32_long(resource)
 
     self:_sort_position_targets()
 
@@ -139,7 +137,7 @@ function Flexihash:lookup_list(resource, requested_count)
     end
 
     -- hash resource to a position
-    local resource_position = CRC.crc32(resource)
+    local resource_position = ngx.crc32_long(resource)
 
     local results = {}
     local results_map = {}
