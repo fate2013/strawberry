@@ -226,10 +226,11 @@ end
 
 function TestController:active_record_has_one()
     local user = User:find():one()
-    local user_addr = user.profile.user_addr
-    user_addr.addr = "aaa"
-    user_addr:save()
-    return response:new():send_json(user_addr:to_array())
+    return response:new():send_json(user)
+    --local user_addr = user.profile.user_addr
+    --user_addr.addr = "aaa"
+    --user_addr:save()
+    --return response:new():send_json(user_addr:to_array())
 end
 
 function TestController:active_record_has_many()

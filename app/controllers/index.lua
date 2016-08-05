@@ -1,4 +1,5 @@
-local cjson = require "cjson.safe"
+local cjson = require('cjson').new()
+local qalarm = require('framework.log.qalarm'):new('Qalarm')
 
 local IndexController = {}
 
@@ -15,6 +16,7 @@ function IndexController:test()
     local p = {}
     p['t'] = 'abc'
     p['s'] = 'def'
+    qalarm:send('test', 'mysql', '200', 'test lua')
     return cjson.encode(p)
 end
 
