@@ -3,8 +3,6 @@ local Schema = require "framework.db.mysql.schema"
 local Replica = require "framework.db.mysql.replica"
 local Registry = require("framework.registry"):new("sys")
 
-local function tappend(t, v) t[#t+1] = v end
-
 local ActiveRecord = {
     table_name = "",
     primary_key = "id",

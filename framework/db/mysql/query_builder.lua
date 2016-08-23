@@ -1,5 +1,3 @@
-local function tappend(t, v) t[#t+1] = v end
-
 local QueryBuilder = {}
 QueryBuilder.__index = QueryBuilder
 

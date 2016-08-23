@@ -10,7 +10,6 @@ local error = error
 local pairs = pairs
 local require = require
 local setmetatable = setmetatable
-local function tappend(t, v) t[#t+1] = v end
 
 local function new_view(view_conf)
     return View:new(view_conf)

@@ -1,5 +1,3 @@
-local function tappend(t, v) t[#t+1] = v end
-
 -- dep
 -- https://github.com/pintsized/lua-resty-http
 local http = require('framework.libs.http')

@@ -1,5 +1,4 @@
 local Connection = require "framework.db.mysql.connection"
-local function tappend(t, v) t[#t+1] = v end
 
 local Replica = {}
 Replica.__index = Replica

@@ -6,8 +6,6 @@ local News = require "test.models.news"
 local cjson = require "cjson.safe"
 local Registry = require("framework.registry"):new("sys")
 
-local function tappend(t, v) t[#t+1] = v end
-
 local TestController = {}
 
 function TestController:mysqlclient()
@@ -226,11 +224,10 @@ end
 
 function TestController:active_record_has_one()
     local user = User:find():one()
-    return response:new():send_json(user)
-    --local user_addr = user.profile.user_addr
-    --user_addr.addr = "aaa"
-    --user_addr:save()
-    --return response:new():send_json(user_addr:to_array())
+    local user_addr = user.profile.user_addr
+    user_addr.addr = "aaa"
+    user_addr:save()
+    return response:new():send_json(user_addr:to_array())
 end
 
 function TestController:active_record_has_many()
@@ -394,6 +391,25 @@ function TestController:rediscluster_switch_config()
     else
         return "invalid redis cluster specified"
     end
+end
+
+function TestController:mongo_query()
+    local mongo_connection = require "framework.db.mongo.connection"
+    local conn = mongo_connection:new()
+    local coor = {}
+    coor[0] = 50
+    coor[1] = 50
+    local results = conn:query("distributed-o2o", "idcs", {
+        loc = {
+            ["$near"] = {
+                ["$geometry"] = {
+                    type = "Point",
+                    coordinates = coor
+                }
+            }
+        }
+    }, {}, 0, 1)
+    return response:new():send_json(results[1]["domain"])
 end
 
 return TestController

@@ -30,6 +30,8 @@ function string.split(str, delimiter)
     return result
 end 
 
+function tappend(t, v) t[#t+1] = v end
+
 -- TODO support recursive
 -- dir: e.g. app.config
 function require_dir(dir)

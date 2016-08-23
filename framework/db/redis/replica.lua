@@ -1,5 +1,4 @@
 local redis_client = require "framework.db.redis.client"
-local function tappend(t, v) t[#t+1] = v end
 
 local Replica = {}
 Replica.__index = Replica

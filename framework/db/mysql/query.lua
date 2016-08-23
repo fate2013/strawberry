@@ -1,8 +1,6 @@
 local QueryBuilder = require "framework.db.mysql.query_builder"
 local Connection = require "framework.db.mysql.connection"
 
-local function tappend(t, v) t[#t+1] = v end
-
 local Query = {
     is_query = true,
 }

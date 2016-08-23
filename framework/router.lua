@@ -2,7 +2,6 @@ local lrucache = require "resty.lrucache"
 
 -- perf
 local error = error
-local function tappend(t, v) t[#t+1] = v end
 
 -- init Router and set routes
 local Router = {}

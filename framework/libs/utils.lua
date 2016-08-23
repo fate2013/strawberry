@@ -11,7 +11,6 @@ local ssub = string.sub
 local type = type
 local append = table.insert
 local concat = table.concat
-local function tappend(t, v) t[#t+1] = v end
 
 local Utils = {}
 

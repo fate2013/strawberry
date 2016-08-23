@@ -8,7 +8,6 @@ MysqlConf = {
             user = "root",
             password = "",
             database = "fruit",
-            conn_timeout = 5000,
         },
         slaves = {
             {
@@ -16,14 +15,12 @@ MysqlConf = {
                 user = "root",
                 password = "",
                 database = "fruit",
-                conn_timeout = 5000,
             },
             {
                 host = "127.0.0.1",
                 user = "root",
                 password = "",
                 database = "fruit",
-                conn_timeout = 5000,
             },
         },
     },
