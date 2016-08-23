@@ -8,10 +8,10 @@ local Registry = require("framework.registry"):new("sys")
 
 local TestController = {}
 
-function TestController:mysqlclient()
-    local mysql_client = require "framework.db.mysql.client"
-    local client = mysql_client:new("127.0.0.1", 3306, "root", "", "fruit", 2000)
-    local res = client:query("select * from user")
+function TestController:mysqlconnection()
+    local mysql_connection = require "framework.db.mysql.connection"
+    local conn = mysql_connection:new("127.0.0.1", 3306, "root", "", "fruit", 2000)
+    local res = conn:query("select * from user")
     return response:new():send_json(res)
 end
 
