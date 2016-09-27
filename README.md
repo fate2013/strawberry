@@ -139,12 +139,8 @@ It's an openresty web framework, contains MVC and ORM
 
 
 ### TODO
-*	unify tappend
-
 *   more unittest
 
 *	more doc
-
-*   Service Locator
 
 *	optimize orm
