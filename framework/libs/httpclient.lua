@@ -22,6 +22,9 @@ local function request(self, url, method, params, headers, timeout_ms)
 		body = params,
 		headers = headers
     })
+    if not res or not res.body then
+        return nil
+    end
     return res.body
 end
 
