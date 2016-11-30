@@ -1,4 +1,4 @@
-local Connection = require "framework.db.mysql.connection"
+local Connection = require "framework.db.mongo.connection"
 local Utils = require "framework.libs.utils"
 
 local Replica = {}
@@ -11,15 +11,16 @@ function Replica:instance(name, config)
         return replicas[name]
     end
     local instance = setmetatable({
-        m = Connection:new(config.master.host, config.master.port, config.master.user,
-            config.master.password, config.master.database, config.master.conn_timeout,
-            config.master.pool_size, config.master.keepalive_time),
+        m = Connection:new(config.master.host, config.master.port, config.master.database,
+            config.master.conn_timeout, config.master.pool_size, config.master.keepalive_time),
         slaves = {},
     }, Replica)
 
-    for i, v in pairs(config.slaves) do
-        Utils.tappend(instance.slaves, Connection:new(v.host, v.port, v.user, v.password,
-            v.database, v.conn_timeout, v.pool_size, v.keepalive_time))
+    if type(config.slaves) == 'table' then
+        for i, v in pairs(config.slaves) do
+            Utils.tappend(instance.slaves, Connection:new(v.host, v.port, v.database, 
+                v.conn_timeout, v.pool_size, v.keepalive_time))
+        end
     end
 
     replicas[name] = instance

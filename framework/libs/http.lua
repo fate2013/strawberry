@@ -123,12 +123,7 @@ function _M.connect(self, ...)
     self.host = select(1, ...)
     self.keepalive = true
 
-    local ok, res_or_error = pcall(sock.connect, sock, ...)
-    if not ok then
-        return nil, res_or_error
-    else
-        return res_or_error, nil
-    end
+    return sock:connect(...)
 end
 
 

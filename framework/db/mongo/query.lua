@@ -1,10 +1,7 @@
-local QueryBuilder = require "framework.db.mysql.query_builder"
-local Connection = require "framework.db.mysql.connection"
+local QueryBuilder = require "framework.db.mongo.query_builder"
 local Utils = require "framework.libs.utils"
 
-local Query = {
-    is_query = true,
-}
+local Query = {}
 Query.__index = Query
 
 function Query:new(model_class)
@@ -12,7 +9,7 @@ function Query:new(model_class)
         p_as_array = false,
 
         p_select = {},
-        p_from = model_class.table_name,
+        p_from = model_class.collection_name,
         p_where = {},
         p_limit = nil,
         p_offset = nil,
@@ -45,13 +42,8 @@ function Query:select(columns)
     return self
 end
 
-function Query:from(table_name)
-    self.p_from = table_name
-    return self
-end
-
 function Query:where(column, value)
-    Utils.tappend(self.p_where, column .. "='" .. value .. "'")
+    self.p_where[column] = value
     return self
 end
 
@@ -256,20 +248,18 @@ end
 
 function Query:one()
     self.p_limit = 1
-    local sql = self.query_builder:build(self)   
-    local row = self.model_class:get_slave_conn():query_one(sql)
+    local row = self.model_class:get_slave_conn():query_one(self.p_from, self.p_where, self.p_select, self.p_offset)
     return populate(self, {row})[1]
 end
 
 function Query:all()
-    local sql = self.query_builder:build(self)
-    local rows = self.model_class:get_slave_conn():query_all(sql)
+    local rows = self.model_class:get_slave_conn():query(self.p_from, self.p_where, self.p_select, self.p_offset)
     return populate(self, rows)
 end
 
-function Query:insert(table_name, columns)
-    local sql = self.query_builder:insert(table_name, columns)
-    return self.model_class:get_master_conn():execute(sql)
+function Query:insert(colname, columns)
+    local docs = {columns}
+    return self.model_class:get_master_conn():insert(colname, docs)
 end
 
 function Query:update(table_name, columns, primary_key)

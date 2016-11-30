@@ -64,7 +64,7 @@ function Utils.split(str, pat)
 
     while s do
         if s ~= 1 or cap ~= "" then
-            tappend(t,cap)
+            Utils.tappend(t,cap)
         end
         last_end = e+1
         s, e, cap = sfind(str, fpat, last_end)
@@ -72,7 +72,7 @@ function Utils.split(str, pat)
 
     if last_end <= #str then
         cap = ssub(str, last_end)
-        tappend(t, cap)
+        Utils.tappend(t, cap)
     end
 
     return t
@@ -339,6 +339,60 @@ function Utils.dirname(str)
     else
         return ''
     end
+end
+
+function Utils.sprint_r( ... )
+    local helpers = require 'framework.libs.utils'
+    return helpers.sprint_r(...)
+end
+
+function Utils.lprint_r( ... )
+    local rs = sprint_r(...)
+    print(rs)
+end
+
+function Utils.print_r( ... )
+    local rs = sprint_r(...)
+    ngx.say(rs)
+end
+
+function Utils.err_log(msg)
+    ngx.log(ngx.ERR, "===debug" .. msg .. "===")
+end
+
+function Utils.str_split(str, delimiter)
+    if str==nil or str=='' or delimiter==nil then
+        return nil 
+    end 
+                        
+    local result = {}
+    for match in (str..delimiter):gmatch("(.-)"..delimiter) do
+        table.insert(result, match)
+    end 
+    return result
+end 
+
+function Utils.tappend(t, v) t[#t+1] = v end
+
+-- TODO support recursive
+-- dir: e.g. app.config
+function Utils.require_dir(dir)
+    if dir == nil then return end
+
+    local loaded = {}
+    local getinfo = io.popen('ls ' .. ngx.var.root .. '/' .. string.gsub(dir, '%.', '/') .. '/*.lua')
+    local all = getinfo:read('*all')
+
+    local paths = Utils.str_split(all, "\n")
+    for _, path in ipairs(paths) do
+        if path ~= '' then
+            path = string.sub(path, 0, -5)
+            _, _, path = string.find(path, '.*/(.-)$')
+            loaded[path] = require(dir .. "." .. path)
+        end
+    end
+
+    return loaded
 end
 
 return Utils

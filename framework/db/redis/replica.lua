@@ -1,4 +1,5 @@
 local redis_client = require "framework.db.redis.client"
+local Utils = require "framework.libs.utils"
 
 local Replica = {}
 Replica.__index = Replica
@@ -17,7 +18,7 @@ function Replica:instance(name, config)
     }, Replica)
     
     for i, v in pairs(config.slaves) do
-        tappend(instance.slaves, redis_client:new(v.host, v.port,
+        Utils.tappend(instance.slaves, redis_client:new(v.host, v.port,
             v.conn_timeout, v.pool_size, v.keepalive_time, v.pwd))
     end
 

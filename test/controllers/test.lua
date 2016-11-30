@@ -1,4 +1,5 @@
 local response = require "framework.response"
+local Utils = require "framework.libs.utils"
 local User = require "test.models.user"
 local Profile = require "test.models.profile"
 local Role = require "test.models.role"
@@ -7,6 +8,10 @@ local cjson = require "cjson.safe"
 local Registry = require("framework.registry"):new("sys")
 
 local TestController = {}
+
+function TestController:echo()
+    return response:new():send_json('test2')
+end
 
 function TestController:mysqlconnection()
     local mysql_connection = require "framework.db.mysql.connection"
@@ -235,7 +240,7 @@ function TestController:active_record_has_many()
     local orders = user.orders
     local order_list = {}
     for _, order in ipairs(orders) do
-        tappend(order_list, order:to_array())
+        Utils.tappend(order_list, order:to_array())
     end
 
     return response:new():send_json(order_list)
@@ -252,14 +257,14 @@ function TestController:active_record_belongs_to_many()
     local roles = user.roles
     local roles_list = {}
     for _, role in ipairs(roles) do
-        tappend(roles_list, role:to_array())
+        Utils.tappend(roles_list, role:to_array())
     end
 
     local role = Role:find():one()
     local users = role.users
     local users_list = {}
     for _, user in ipairs(users) do
-        tappend(users_list, user:to_array())
+        Utils.tappend(users_list, user:to_array())
     end
 
     return response:new():send_json({
@@ -383,7 +388,6 @@ end
 function TestController:rediscluster_switch_config()
     local qconf = require "framework.libs.qconf"
     local err, config = qconf.get_conf_recursive("/activity/shake/redis")
-    print_r(config)
     local redis_cluster = require "framework.db.redis.cluster"
     local cluster = redis_cluster:instance("activity", config)
     if cluster then
@@ -393,13 +397,31 @@ function TestController:rediscluster_switch_config()
     end
 end
 
+function TestController:mongo_raw_query()
+    local mongo = require "resty.mongol"
+    conn = mongo:new()
+    conn:set_timeout(1000)
+    ok, err = conn:connect('127.0.0.1', '27017')
+    if not ok then
+        ngx.say("connect failed: "..err)
+    end
+
+    local db = conn:new_db_handle ( "distributed-o2o" )
+    local col = db:get_col("user")
+
+    local result = col:find_one({uuid='100'})
+
+    return response:new():send_json(result.uuid)
+end
+
 function TestController:mongo_query()
     local mongo_connection = require "framework.db.mongo.connection"
-    local conn = mongo_connection:new()
+    local config = self.app:get("config"):get("mongo").default.master
+    local conn = mongo_connection:new(config.host, config.port, config.database)
     local coor = {}
-    coor[0] = 50
-    coor[1] = 50
-    local results = conn:query("distributed-o2o", "idcs", {
+    Utils.tappend(coor, 50)
+    Utils.tappend(coor, 50)
+    local results = conn:query("idcs", {
         loc = {
             ["$near"] = {
                 ["$geometry"] = {
@@ -409,7 +431,25 @@ function TestController:mongo_query()
             }
         }
     }, {}, 0, 1)
-    return response:new():send_json(results[1]["domain"])
+    return response:new():send_json({
+        name = results[1]["name"],
+        domain = results[1]["domain"],
+    })
+end
+
+function TestController:mongo_find()
+    local mongo_connection = require "framework.db.mongo.connection"
+    local config = self.app:get("config"):get("mongo").default.master
+    local conn = mongo_connection:new(config.host, config.port, config.database)
+    local result = conn:query_one("user", {uuid = '100'})
+    return response:new():send_json(result.uuid)
+end
+
+function TestController:mongo_ar()
+    local MUser = require "test.models.muser"
+    local ObjectId = require "resty.mongol.object_id"
+    local user = MUser:find():where("uuid", '100'):one()
+    return response:new():send_json(user.uuid)
 end
 
 return TestController

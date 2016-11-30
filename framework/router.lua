@@ -1,4 +1,5 @@
 local lrucache = require "resty.lrucache"
+local Utils = require "framework.libs.utils"
 
 -- perf
 local error = error
@@ -32,7 +33,7 @@ end
 function Router:addRoute(route, only_one)
     if route ~= nil then
         if only_one then self.routes = {} end
-        tappend(self.routes, route)
+        Utils.tappend(self.routes, route)
     end
 end
 

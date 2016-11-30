@@ -100,8 +100,11 @@ function Response:error(code, msg)
     return cjson.encode({status = code, message = msg, data = {}})
 end
 
-function Response:send_raw(payload)
-    self:setHeader("Content-Type", "application/json; charset=UTF-8")
+function Response:send_raw(payload, content_type)
+    if not content_type then
+        content_type = "application/json"
+    end
+    self:setHeader("Content-Type", content_type .. "; charset=UTF-8")
     return payload
 end
 

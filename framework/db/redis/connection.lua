@@ -1,11 +1,12 @@
 local redis = require "resty.redis"
+local Utils = require "framework.libs.utils"
 
 local function tsub(t, first, last)
     local tb = {}
     if not last then last = #t end
     for i = first, last do
         local ele = t[i]
-        tappend(tb, ele)
+        Utils.tappend(tb, ele)
     end
     return tb
 end

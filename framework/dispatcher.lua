@@ -4,6 +4,7 @@ local Router = require 'framework.router'
 local Response = require 'framework.response'
 local View = require 'framework.views.rtpl'
 local Error = require 'framework.error'
+local Utils = require "framework.libs.utils"
 
 -- perf
 local error = error
@@ -49,7 +50,7 @@ function Dispatcher:getResponse()
 end
 
 function Dispatcher:registerPlugin(plugin)
-    if plugin ~= nil then tappend(self.plugins, plugin) end
+    if plugin ~= nil then Utils.tappend(self.plugins, plugin) end
 end
 
 function Dispatcher:_runPlugins(hook)

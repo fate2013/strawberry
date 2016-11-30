@@ -17,7 +17,6 @@ local function build_select(columns)
     return "SELECT " .. table.concat(select, ",")
 end
 
---TODO multi tables
 local function build_from(table)
     return "FROM " .. table
 end

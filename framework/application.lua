@@ -1,4 +1,3 @@
-require "framework.functions"
 local Error = require 'framework.error'
 local Dispatcher = require 'framework.dispatcher'
 local Registry = require('framework.registry'):new('sys')
@@ -42,7 +41,7 @@ function Application:error_response(code, msg)
 end
 
 local function load_app_config(self)
-    local config = require_dir(self.config.module_name .. ".config")
+    local config = Utils.require_dir(self.config.module_name .. ".config")
     for k, v in pairs(config) do
         self.config[k] = v
     end
@@ -71,6 +70,7 @@ local function register_components(self)
             end
         end
     end
+    self:instance("config", (require "framework.config"):new(self.config))
 end
 
 function Application:new(config)
