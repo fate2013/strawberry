@@ -1,5 +1,5 @@
 local cjson = require('cjson').new()
-local qalarm = require('framework.log.qalarm'):new('Qalarm')
+local qalarm = require('framework.log.alarm'):new('Qalarm')
 
 local IndexController = {}
 
