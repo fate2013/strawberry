@@ -341,18 +341,13 @@ function Utils.dirname(str)
     end
 end
 
-function Utils.sprint_r( ... )
-    local helpers = require 'framework.libs.utils'
-    return helpers.sprint_r(...)
-end
-
 function Utils.lprint_r( ... )
-    local rs = sprint_r(...)
+    local rs = Utils.sprint_r(...)
     print(rs)
 end
 
 function Utils.print_r( ... )
-    local rs = sprint_r(...)
+    local rs = Utils.sprint_r(...)
     ngx.say(rs)
 end
 
