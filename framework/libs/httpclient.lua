@@ -46,7 +46,7 @@ function HttpClient:get(url, params, headers, timeout_ms)
         end
         url = url .. build_params(params)
     end
-    return self:request(self, url, "GET", '', headers, timeout_ms)
+    return self:request(url, "GET", '', headers, timeout_ms)
 end
 
 function HttpClient:post(url, params, headers, timeout_ms)
@@ -56,7 +56,7 @@ function HttpClient:post(url, params, headers, timeout_ms)
     if not headers["Content-Type"] then
         headers["Content-Type"] = "application/x-www-form-urlencoded"
     end
-    return self:request(self, url, "POST", build_params(params), headers, timeout_ms)
+    return self:request(url, "POST", build_params(params), headers, timeout_ms)
 end
 
 function HttpClient:put(url, params, headers, timeout_ms)
@@ -66,11 +66,11 @@ function HttpClient:put(url, params, headers, timeout_ms)
     if not headers["Content-Type"] then
         headers["Content-Type"] = "application/x-www-form-urlencoded"
     end
-    return self:request(self, url, "PUT", build_params(params), headers, timeout_ms)
+    return self:request(url, "PUT", build_params(params), headers, timeout_ms)
 end
 
 function HttpClient:delete(url, params, headers, timeout_ms)
-    return self:request(self, url, "DELETE", build_params(params), headers, timeout_ms)
+    return self:request(url, "DELETE", build_params(params), headers, timeout_ms)
 end
 
 return HttpClient
