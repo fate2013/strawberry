@@ -99,16 +99,14 @@ function Flexihash:lookup(resource)
     local lower = 1
     local higher = #self._position_target_pairs
 
-    if self._position_target_pairs[higher][1] < resource_position then
+    if self._position_target_pairs[higher][1] <= resource_position or self._position_target_pairs[1][1] > resource_position then
         return self._position_target_pairs[1][2]
     end
 
     local middle
     while higher - lower > 1 do
         middle = math.ceil((lower + higher) / 2)
-        if resource_position == self._position_target_pairs[middle][1] then
-            return self._position_target_pairs[middle][2]
-        elseif resource_position < self._position_target_pairs[middle][1] then
+        if resource_position < self._position_target_pairs[middle][1] then
             higher = middle
         else
             lower = middle
