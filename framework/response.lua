@@ -18,6 +18,12 @@ function Response:new()
         prepend_body = ''
     }
     setmetatable(instance, Response)
+    instance:setHeaders({
+        ["Access-Control-Allow-Headers"] = "x-requested-with,content-type,Access-Control-Allow-Origin,cache-control",
+        ["Access-Control-Allow-Origin"] = "http://union2.sit.ffan.com:3330",
+        ["Access-Control-Allow-Methods"] = "POST, PUT, GET, OPTIONS, DELETE",
+        ["Access-Control-Allow-Credentials"] = "true"
+    })
     return instance
 end
 
@@ -75,10 +81,26 @@ function Response:setHeaders(headers)
             ngx.header[header] = value
         end
     end
+    return self
 end
 
 function Response:setHeader(key, value)
 	ngx.header[key] = value
+    return self
+end
+
+function Response:appendHeader(key, value)
+    local orig_value = ngx.header[key]
+    local new_value
+    if type(orig_value) == "table" then
+        new_value = orig_value
+        Utils.tappend(new_value, value)
+    else
+        new_value = {orig_value, value}
+    end
+
+    ngx.header[key] = new_value
+    return self
 end
 
 function Response:send_json(data, code, msg)
@@ -95,7 +117,7 @@ end
 
 function Response:error(code, msg)
     if not code then code = 500 end
-    if not msg or not Registry.app.config.debug and code == 500 then msg = "服务器错误" end
+    if not msg or not Registry.app:get("config"):get("app")["debug"] and code == 500 then msg = "服务器错误" end
     self:setHeader("Content-Type", "application/json; charset=UTF-8")
     return cjson.encode({status = code, message = msg, data = {}})
 end

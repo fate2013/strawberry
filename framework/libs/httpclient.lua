@@ -18,15 +18,11 @@ end
 
 function HttpClient:request(url, method, params, headers, timeout_ms)
     self.http_handle:set_timeout(timeout_ms)
-	local res, err = self.http_handle:request_uri(url, {
+	return self.http_handle:request_uri(url, {
 		method = method,
 		body = params,
 		headers = headers
     })
-    if not res or not res.body then
-        return nil
-    end
-    return res.body
 end
 
 local function build_params(params)
