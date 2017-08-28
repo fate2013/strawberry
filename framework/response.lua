@@ -18,12 +18,6 @@ function Response:new()
         prepend_body = ''
     }
     setmetatable(instance, Response)
-    instance:setHeaders({
-        ["Access-Control-Allow-Headers"] = "x-requested-with,content-type,Access-Control-Allow-Origin,cache-control",
-        ["Access-Control-Allow-Origin"] = "http://union2.sit.ffan.com:3330",
-        ["Access-Control-Allow-Methods"] = "POST, PUT, GET, OPTIONS, DELETE",
-        ["Access-Control-Allow-Credentials"] = "true"
-    })
     return instance
 end
 
