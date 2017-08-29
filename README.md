@@ -137,6 +137,10 @@ It's an openresty web framework, contains MVC and ORM
 
 *	example: see test/models/user.lua
 
+####	Config facade
+*	app/config/mysql.lua
+    		local Registry = require("framework.registry"):new("sys")
+			Registry.app:get("config"):get("mysql")
 
 ### TODO
 *   more unittest
