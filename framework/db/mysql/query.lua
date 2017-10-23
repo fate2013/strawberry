@@ -1,5 +1,4 @@
 local QueryBuilder = require "framework.db.mysql.query_builder"
-local Connection = require "framework.db.mysql.connection"
 local Utils = require "framework.libs.utils"
 
 local Query = {
